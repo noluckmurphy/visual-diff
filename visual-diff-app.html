@@ -508,6 +508,7 @@
                 <div class="mode-toggle">
                     <button class="mode-btn active" data-mode="overlay">Overlay Mode</button>
                     <button class="mode-btn" data-mode="heatmap">Heatmap Mode</button>
+                    <button class="mode-btn" data-mode="intensity">Intensity Mode</button>
                 </div>
             </div>
 
@@ -524,6 +525,21 @@
                 <div class="control-row">
                     <input type="range" id="blurRadius" min="0" max="10" step="1" value="2">
                     <span id="blurRadiusValue">2px</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="useFlexibleMatching">
+                    <label for="useFlexibleMatching" style="margin-bottom: 0;">Enable flexible matching (perceptual similarity, SSIM-inspired)</label>
+                </div>
+            </div>
+
+            <div class="control-group" id="flexibleMatchingSensitivityControl" style="display: none;">
+                <label>Flexible Matching Sensitivity (higher = more forgiving)</label>
+                <div class="control-row">
+                    <input type="range" id="flexibleMatchingSensitivity" min="0.1" max="2.0" step="0.1" value="0.8">
+                    <span id="flexibleMatchingSensitivityValue">0.8</span>
                 </div>
             </div>
 
@@ -626,11 +642,13 @@
     </div>
 
     <script>
-        // Pixelmatch implementation (inline to avoid CDN issues)
+        // Pixelmatch implementation with magnitude support
         function pixelmatch(img1, img2, output, width, height, options) {
             options = options || {};
             const threshold = options.threshold === undefined ? 0.1 : options.threshold;
             const includeAA = options.includeAA !== undefined ? options.includeAA : true;
+            const useFlexibleMatching = options.useFlexibleMatching || false;
+            const flexibleSensitivity = options.flexibleSensitivity || 0.8;
 
             let diff = 0;
             
@@ -658,20 +676,75 @@
                         continue;
                     }
                     
-                    // Calculate color difference using YIQ color space
-                    const yDiff = rgbToY(r1, g1, b1) - rgbToY(r2, g2, b2);
-                    const iDiff = rgbToI(r1, g1, b1) - rgbToI(r2, g2, b2);
-                    const qDiff = rgbToQ(r1, g1, b1) - rgbToQ(r2, g2, b2);
+                    let delta;
                     
-                    const delta = Math.sqrt(yDiff * yDiff + iDiff * iDiff + qDiff * qDiff);
-                    
-                    if (delta > threshold) {
-                        if (output) {
-                            output[y * width + x] = Math.min(255, Math.floor(delta * 255));
+                    if (useFlexibleMatching) {
+                        // SSIM-inspired perceptual matching
+                        // Consider local neighborhood for structural similarity
+                        const windowSize = 3;
+                        let localSimilarity = 0;
+                        let count = 0;
+                        
+                        for (let wy = -1; wy <= 1; wy++) {
+                            for (let wx = -1; wx <= 1; wx++) {
+                                const nx = x + wx;
+                                const ny = y + wy;
+                                
+                                if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                                    const npos = (ny * width + nx) * 4;
+                                    
+                                    // Calculate local difference
+                                    const nr1 = img1[npos];
+                                    const ng1 = img1[npos + 1];
+                                    const nb1 = img1[npos + 2];
+                                    
+                                    const nr2 = img2[npos];
+                                    const ng2 = img2[npos + 1];
+                                    const nb2 = img2[npos + 2];
+                                    
+                                    const nyDiff = rgbToY(nr1, ng1, nb1) - rgbToY(nr2, ng2, nb2);
+                                    const niDiff = rgbToI(nr1, ng1, nb1) - rgbToI(nr2, ng2, nb2);
+                                    const nqDiff = rgbToQ(nr1, ng1, nb1) - rgbToQ(nr2, ng2, nb2);
+                                    
+                                    const nDelta = Math.sqrt(nyDiff * nyDiff + niDiff * niDiff + nqDiff * nqDiff);
+                                    localSimilarity += nDelta;
+                                    count++;
+                                }
+                            }
                         }
+                        
+                        const avgLocalSimilarity = localSimilarity / count;
+                        
+                        // Calculate pixel difference
+                        const yDiff = rgbToY(r1, g1, b1) - rgbToY(r2, g2, b2);
+                        const iDiff = rgbToI(r1, g1, b1) - rgbToI(r2, g2, b2);
+                        const qDiff = rgbToQ(r1, g1, b1) - rgbToQ(r2, g2, b2);
+                        
+                        const pixelDelta = Math.sqrt(yDiff * yDiff + iDiff * iDiff + qDiff * qDiff);
+                        
+                        // Combine pixel difference with local context
+                        // If local area is similar, be more forgiving
+                        const contextWeight = Math.max(0, 1 - (avgLocalSimilarity / (threshold * flexibleSensitivity)));
+                        delta = pixelDelta * (1 - contextWeight * 0.5);
+                    } else {
+                        // Standard YIQ color space difference
+                        const yDiff = rgbToY(r1, g1, b1) - rgbToY(r2, g2, b2);
+                        const iDiff = rgbToI(r1, g1, b1) - rgbToI(r2, g2, b2);
+                        const qDiff = rgbToQ(r1, g1, b1) - rgbToQ(r2, g2, b2);
+                        
+                        delta = Math.sqrt(yDiff * yDiff + iDiff * iDiff + qDiff * qDiff);
+                    }
+                    
+                    // Store magnitude (0-255) instead of binary
+                    if (output) {
+                        // Normalize delta to 0-255 range, scaled by threshold
+                        const normalizedDelta = Math.min(255, Math.floor((delta / threshold) * 255));
+                        output[y * width + x] = normalizedDelta;
+                    }
+                    
+                    // Count as different if above threshold
+                    if (delta > threshold) {
                         diff++;
-                    } else if (output) {
-                        output[y * width + x] = 0;
                     }
                 }
             }
@@ -846,6 +919,14 @@
 
         document.getElementById('useBlockComparison').addEventListener('change', (e) => {
             document.getElementById('blockSizeControl').style.display = e.target.checked ? 'block' : 'none';
+        });
+
+        document.getElementById('flexibleMatchingSensitivity').addEventListener('input', (e) => {
+            document.getElementById('flexibleMatchingSensitivityValue').textContent = e.target.value;
+        });
+
+        document.getElementById('useFlexibleMatching').addEventListener('change', (e) => {
+            document.getElementById('flexibleMatchingSensitivityControl').style.display = e.target.checked ? 'block' : 'none';
         });
 
         // Mode toggle
@@ -1079,13 +1160,21 @@
                 );
             } else {
                 // Pixel-based comparison
+                const useFlexibleMatching = document.getElementById('useFlexibleMatching').checked;
+                const flexibleSensitivity = parseFloat(document.getElementById('flexibleMatchingSensitivity').value);
+                
                 numDiffPixels = pixelmatch(
                     beforeData.data,
                     afterData.data,
                     diff,
                     afterImage.width,
                     afterImage.height,
-                    { threshold: threshold, includeAA: true }
+                    { 
+                        threshold: threshold, 
+                        includeAA: true,
+                        useFlexibleMatching: useFlexibleMatching,
+                        flexibleSensitivity: flexibleSensitivity
+                    }
                 );
             }
 
@@ -1125,17 +1214,26 @@
                 if (showOutlines) {
                     drawOutlines(ctx, processed, afterImage.width, afterImage.height);
                 }
-            } else {
-                // Heatmap mode: show difference intensity
+            } else if (currentMode === 'heatmap') {
+                // Heatmap mode: show difference intensity with gradient
                 ctx.drawImage(afterImage, 0, 0);
                 
                 const heatmapData = ctx.getImageData(0, 0, afterImage.width, afterImage.height);
                 
+                // Find max intensity for normalization
+                let maxIntensity = 0;
+                for (let i = 0; i < diff.length; i++) {
+                    if (diff[i] > maxIntensity) {
+                        maxIntensity = diff[i];
+                    }
+                }
+                
                 for (let i = 0; i < diff.length; i++) {
                     if (diff[i] > 0) {
                         const pixelIndex = i * 4;
-                        const intensity = Math.min(255, diff[i] * 2);
-                        const heatColor = intensityToHeatColor(intensity);
+                        // Use actual magnitude from diff array (0-255)
+                        const normalizedIntensity = maxIntensity > 0 ? (diff[i] / maxIntensity) * 255 : diff[i];
+                        const heatColor = intensityToHeatColor(normalizedIntensity);
                         
                         // Blend with original
                         heatmapData.data[pixelIndex] = Math.floor(
@@ -1151,6 +1249,39 @@
                 }
                 
                 ctx.putImageData(heatmapData, 0, 0);
+            } else if (currentMode === 'intensity') {
+                // Intensity mode: show raw difference magnitude
+                ctx.drawImage(afterImage, 0, 0);
+                
+                const intensityData = ctx.getImageData(0, 0, afterImage.width, afterImage.height);
+                
+                // Find max intensity for normalization
+                let maxIntensity = 0;
+                for (let i = 0; i < diff.length; i++) {
+                    if (diff[i] > maxIntensity) {
+                        maxIntensity = diff[i];
+                    }
+                }
+                
+                for (let i = 0; i < diff.length; i++) {
+                    const pixelIndex = i * 4;
+                    // Map magnitude directly to grayscale
+                    const intensity = maxIntensity > 0 ? (diff[i] / maxIntensity) * 255 : 0;
+                    
+                    // Blend intensity with original (grayscale overlay)
+                    const gray = Math.floor(intensity);
+                    intensityData.data[pixelIndex] = Math.floor(
+                        intensityData.data[pixelIndex] * (1 - opacity) + gray * opacity
+                    );
+                    intensityData.data[pixelIndex + 1] = Math.floor(
+                        intensityData.data[pixelIndex + 1] * (1 - opacity) + gray * opacity
+                    );
+                    intensityData.data[pixelIndex + 2] = Math.floor(
+                        intensityData.data[pixelIndex + 2] * (1 - opacity) + gray * opacity
+                    );
+                }
+                
+                ctx.putImageData(intensityData, 0, 0);
             }
 
             // Update UI
@@ -1242,11 +1373,12 @@
                     
                     const isDifferent = delta > threshold;
                     
-                    // Mark all pixels in this block
+                    // Mark all pixels in this block with magnitude
+                    const magnitude = isDifferent ? Math.min(255, Math.floor((delta / threshold) * 255)) : 0;
                     for (let y = by; y < Math.min(by + blockSize, height); y++) {
                         for (let x = bx; x < Math.min(bx + blockSize, width); x++) {
                             const idx = y * width + x;
-                            output[idx] = isDifferent ? 255 : 0;
+                            output[idx] = magnitude;
                         }
                     }
                     
