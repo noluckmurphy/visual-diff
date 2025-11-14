@@ -318,6 +318,37 @@
             border: 2px solid #ddd;
         }
 
+        .legend-gradient {
+            width: 200px;
+            height: 24px;
+            border-radius: 4px;
+            border: 2px solid #ddd;
+            background: linear-gradient(to right, #0000ff, #00ffff, #00ff00, #ffff00, #ff0000);
+        }
+
+        .legend-gradient-intensity {
+            width: 200px;
+            height: 24px;
+            border-radius: 4px;
+            border: 2px solid #ddd;
+            background: linear-gradient(to right, #000000, #ffffff);
+        }
+
+        .legend-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 200px;
+            margin-top: 4px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .legend-mode {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
         .magnifier {
             position: fixed;
             width: 400px;
@@ -742,15 +773,44 @@
                 </div>
             </div>
             <div class="legend" id="legend" style="display: none;">
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #ff6b6b;"></div>
-                    <span>Changed Areas</span>
+                <!-- Overlay mode legend -->
+                <div class="legend-mode" id="legendOverlay">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ff6b6b;"></div>
+                        <span>Changed Areas</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(0,0,0,0); border: 2px solid #ddd;"></div>
+                        <span>Unchanged Areas</span>
+                    </div>
                 </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: rgba(0,0,0,0);"></div>
-                    <span>Unchanged Areas</span>
+                
+                <!-- Heatmap mode legend -->
+                <div class="legend-mode" id="legendHeatmap" style="display: none;">
+                    <div class="legend-item" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                        <div class="legend-gradient"></div>
+                        <div class="legend-labels">
+                            <span>Low</span>
+                            <span>High</span>
+                        </div>
+                        <span style="font-size: 12px; color: #666;">Difference Intensity</span>
+                    </div>
                 </div>
-                <div class="legend-item">
+                
+                <!-- Intensity mode legend -->
+                <div class="legend-mode" id="legendIntensity" style="display: none;">
+                    <div class="legend-item" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                        <div class="legend-gradient-intensity"></div>
+                        <div class="legend-labels">
+                            <span>No Change</span>
+                            <span>Max Change</span>
+                        </div>
+                        <span style="font-size: 12px; color: #666;">Difference Magnitude</span>
+                    </div>
+                </div>
+                
+                <!-- Stats (shown for all modes) -->
+                <div class="legend-item" style="margin-left: auto;">
                     <span id="statsText"></span>
                 </div>
             </div>
@@ -1070,14 +1130,44 @@
             }
         });
 
+        // Update legend color when highlight color changes
+        document.getElementById('highlightColor').addEventListener('input', (e) => {
+            const overlayColorBox = document.querySelector('#legendOverlay .legend-color');
+            if (overlayColorBox) {
+                overlayColorBox.style.background = e.target.value;
+            }
+        });
+
         // Mode toggle
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
                 currentMode = e.target.dataset.mode;
+                updateLegendForMode();
             });
         });
+
+        // Update legend based on current mode
+        function updateLegendForMode() {
+            const legendOverlay = document.getElementById('legendOverlay');
+            const legendHeatmap = document.getElementById('legendHeatmap');
+            const legendIntensity = document.getElementById('legendIntensity');
+            
+            // Hide all legend modes
+            legendOverlay.style.display = 'none';
+            legendHeatmap.style.display = 'none';
+            legendIntensity.style.display = 'none';
+            
+            // Show appropriate legend for current mode
+            if (currentMode === 'overlay') {
+                legendOverlay.style.display = 'flex';
+            } else if (currentMode === 'heatmap') {
+                legendHeatmap.style.display = 'flex';
+            } else if (currentMode === 'intensity') {
+                legendIntensity.style.display = 'flex';
+            }
+        }
 
         // Magnifier toggle
         document.getElementById('magnifierToggle').addEventListener('click', (e) => {
@@ -1194,6 +1284,13 @@
             statusMessage.style.display = 'none';
             legend.style.display = 'none';
             loadingContainer.classList.add('active');
+            
+            // Update legend color for overlay mode if highlight color changed
+            const highlightColor = document.getElementById('highlightColor').value;
+            const overlayColorBox = document.querySelector('#legendOverlay .legend-color');
+            if (overlayColorBox) {
+                overlayColorBox.style.background = highlightColor;
+            }
             processBtn.disabled = true;
             processBtn.textContent = 'Processing...';
             
@@ -1527,6 +1624,9 @@
             document.getElementById('statsText').textContent = 
                 `${changePercent}% of image changed (${numDiffPixels.toLocaleString()} pixels)`;
             
+            // Update legend for current mode
+            updateLegendForMode();
+            
             // Show results
             canvas.style.display = 'block';
             document.getElementById('loadingContainer').classList.remove('active');
@@ -1784,6 +1884,9 @@
 
         // Initialize magnifier
         setupMagnifier();
+        
+        // Initialize legend for default mode (overlay)
+        updateLegendForMode();
     </script>
 </body>
 </html>
