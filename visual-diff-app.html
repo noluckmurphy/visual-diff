@@ -453,6 +453,93 @@
             font-size: 14px;
             color: #1565c0;
         }
+
+        .background-processes {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 15px;
+            min-width: 250px;
+            max-width: 350px;
+            z-index: 10001;
+            display: none;
+        }
+
+        .background-processes.active {
+            display: block;
+        }
+
+        .background-processes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .background-processes-header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .background-processes-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .background-processes-close:hover {
+            color: #333;
+        }
+
+        .process-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .process-item-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .process-item-stage {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .process-item-progress {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .process-item-progress-bar {
+            height: 100%;
+            background: #667eea;
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body>
@@ -578,6 +665,14 @@
             </button>
         </div>
 
+        <div class="background-processes" id="backgroundProcesses">
+            <div class="background-processes-header">
+                <h3>🔄 Background Processing</h3>
+                <button class="background-processes-close" id="backgroundProcessesClose">×</button>
+            </div>
+            <div id="processItems"></div>
+        </div>
+
         <div class="output-section">
             <h2>📊 Comparison Result</h2>
             <div class="output-container" id="outputContainer">
@@ -626,71 +721,135 @@
     </div>
 
     <script>
-        // Pixelmatch implementation (inline to avoid CDN issues)
-        function pixelmatch(img1, img2, output, width, height, options) {
-            options = options || {};
-            const threshold = options.threshold === undefined ? 0.1 : options.threshold;
-            const includeAA = options.includeAA !== undefined ? options.includeAA : true;
+        // Web Worker for image processing
+        let imageWorker = null;
+        let currentProcessId = null;
+        let processQueue = [];
 
-            let diff = 0;
+        function initWorker() {
+            if (!imageWorker) {
+                imageWorker = new Worker('image-processor-worker.js');
+                
+                imageWorker.addEventListener('message', function(e) {
+                    const { type, progress, stage, diff, numDiffPixels, diffArray, error } = e.data;
+                    
+                    if (type === 'progress') {
+                        updateProcessProgress(currentProcessId, progress, stage);
+                    } else if (type === 'result') {
+                        handleWorkerResult(diff, numDiffPixels, diffArray);
+                    } else if (type === 'error') {
+                        console.error('Worker error:', error);
+                        handleWorkerError(error);
+                    }
+                });
+                
+                imageWorker.addEventListener('error', function(e) {
+                    console.error('Worker error:', e);
+                    handleWorkerError(e.message);
+                });
+            }
+        }
+
+        const stageNames = {
+            'blur-before': 'Blurring before image...',
+            'blur-after': 'Blurring after image...',
+            'blur': 'Applying blur...',
+            'pixel-comparison': 'Comparing pixels...',
+            'block-comparison': 'Comparing blocks...',
+            'morphology': 'Processing regions...'
+        };
+
+        function updateProcessProgress(processId, progress, stage) {
+            const processItems = document.getElementById('processItems');
+            const processItem = document.getElementById(`process-${processId}`);
             
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
-                    const pos = (y * width + x) * 4;
-                    
-                    // Get RGB values
-                    const r1 = img1[pos];
-                    const g1 = img1[pos + 1];
-                    const b1 = img1[pos + 2];
-                    const a1 = img1[pos + 3];
-                    
-                    const r2 = img2[pos];
-                    const g2 = img2[pos + 1];
-                    const b2 = img2[pos + 2];
-                    const a2 = img2[pos + 3];
-                    
-                    // If alpha channels are different, consider it different
-                    if (Math.abs(a1 - a2) > 1) {
-                        if (output) {
-                            output[y * width + x] = 255;
-                        }
-                        diff++;
-                        continue;
-                    }
-                    
-                    // Calculate color difference using YIQ color space
-                    const yDiff = rgbToY(r1, g1, b1) - rgbToY(r2, g2, b2);
-                    const iDiff = rgbToI(r1, g1, b1) - rgbToI(r2, g2, b2);
-                    const qDiff = rgbToQ(r1, g1, b1) - rgbToQ(r2, g2, b2);
-                    
-                    const delta = Math.sqrt(yDiff * yDiff + iDiff * iDiff + qDiff * qDiff);
-                    
-                    if (delta > threshold) {
-                        if (output) {
-                            output[y * width + x] = Math.min(255, Math.floor(delta * 255));
-                        }
-                        diff++;
-                    } else if (output) {
-                        output[y * width + x] = 0;
-                    }
+            if (processItem) {
+                const progressBar = processItem.querySelector('.process-item-progress-bar');
+                const stageText = processItem.querySelector('.process-item-stage');
+                
+                if (progressBar) {
+                    progressBar.style.width = `${progress}%`;
+                }
+                if (stageText) {
+                    stageText.textContent = stageNames[stage] || stage;
                 }
             }
             
-            return diff;
+            // Update main loading progress
+            const loadingProgress = document.getElementById('loadingProgress');
+            if (loadingProgress) {
+                loadingProgress.textContent = stageNames[stage] || 'Processing...';
+            }
         }
-        
-        // YIQ color space conversion for better perceptual difference detection
-        function rgbToY(r, g, b) {
-            return r * 0.29889531 + g * 0.58662247 + b * 0.11448223;
+
+        function addProcessToQueue(processId, title) {
+            const backgroundProcesses = document.getElementById('backgroundProcesses');
+            const processItems = document.getElementById('processItems');
+            
+            const processItem = document.createElement('div');
+            processItem.className = 'process-item';
+            processItem.id = `process-${processId}`;
+            processItem.innerHTML = `
+                <div class="process-item-title">${title}</div>
+                <div class="process-item-stage">Initializing...</div>
+                <div class="process-item-progress">
+                    <div class="process-item-progress-bar" style="width: 0%"></div>
+                </div>
+            `;
+            
+            processItems.appendChild(processItem);
+            backgroundProcesses.classList.add('active');
         }
-        
-        function rgbToI(r, g, b) {
-            return r * 0.59597799 - g * 0.27417610 - b * 0.32180189;
+
+        function removeProcessFromQueue(processId) {
+            const processItem = document.getElementById(`process-${processId}`);
+            if (processItem) {
+                processItem.remove();
+            }
+            
+            const processItems = document.getElementById('processItems');
+            if (processItems.children.length === 0) {
+                const backgroundProcesses = document.getElementById('backgroundProcesses');
+                backgroundProcesses.classList.remove('active');
+            }
         }
-        
-        function rgbToQ(r, g, b) {
-            return r * 0.21147017 - g * 0.52261711 + b * 0.31114694;
+
+        function handleWorkerResult(diff, numDiffPixels, diffArray) {
+            const diffArrayTyped = new Uint8Array(diff);
+            const originalDiffArray = new Uint8Array(diffArray);
+            
+            // Continue with rendering (this part stays on main thread)
+            renderComparisonResult(diffArrayTyped, originalDiffArray, numDiffPixels);
+            
+            // Remove process from queue
+            if (currentProcessId) {
+                setTimeout(() => {
+                    removeProcessFromQueue(currentProcessId);
+                }, 500);
+            }
         }
+
+        function handleWorkerError(error) {
+            const statusMessage = document.getElementById('statusMessage');
+            const loadingContainer = document.getElementById('loadingContainer');
+            const processBtn = document.getElementById('processBtn');
+            
+            statusMessage.textContent = `Error processing images: ${error}`;
+            statusMessage.style.display = 'block';
+            loadingContainer.classList.remove('active');
+            processBtn.disabled = false;
+            processBtn.textContent = 'Generate Comparison';
+            
+            if (currentProcessId) {
+                removeProcessFromQueue(currentProcessId);
+            }
+        }
+
+        // Background processes UI
+        document.getElementById('backgroundProcessesClose').addEventListener('click', () => {
+            const backgroundProcesses = document.getElementById('backgroundProcesses');
+            backgroundProcesses.classList.remove('active');
+        });
 
         let beforeImage = null;
         let afterImage = null;
@@ -1019,6 +1178,9 @@
         function processImages() {
             if (!beforeImage || !afterImage) return;
 
+            // Initialize worker
+            initWorker();
+
             const canvas = document.getElementById('outputCanvas');
             const ctx = canvas.getContext('2d');
             
@@ -1042,66 +1204,56 @@
             afterCtx.drawImage(afterImage, 0, 0);
 
             // Get image data
-            let beforeData = beforeCtx.getImageData(0, 0, afterImage.width, afterImage.height);
-            let afterData = afterCtx.getImageData(0, 0, afterImage.width, afterImage.height);
+            const beforeData = beforeCtx.getImageData(0, 0, afterImage.width, afterImage.height);
+            const afterData = afterCtx.getImageData(0, 0, afterImage.width, afterImage.height);
 
             // Get settings
             const threshold = parseFloat(document.getElementById('threshold').value);
             const blurRadius = parseInt(document.getElementById('blurRadius').value);
             const useBlockComparison = document.getElementById('useBlockComparison').checked;
             const blockSize = parseInt(document.getElementById('blockSize').value);
+            const minRegionSize = parseInt(document.getElementById('minRegionSize').value);
+
+            // Generate process ID
+            currentProcessId = 'process-' + Date.now();
+            addProcessToQueue(currentProcessId, 'Image Comparison');
+
+            // Send data to worker
+            imageWorker.postMessage({
+                type: 'process',
+                data: {
+                    beforeData: beforeData.data.buffer,
+                    afterData: afterData.data.buffer,
+                    width: afterImage.width,
+                    height: afterImage.height,
+                    threshold: threshold,
+                    blurRadius: blurRadius,
+                    useBlockComparison: useBlockComparison,
+                    blockSize: blockSize,
+                    minRegionSize: minRegionSize
+                }
+            }, [beforeData.data.buffer, afterData.data.buffer]);
+        }
+
+        function renderComparisonResult(processed, originalDiff, numDiffPixels) {
+            const canvas = document.getElementById('outputCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Get settings for rendering
             const opacity = parseFloat(document.getElementById('opacity').value);
             const highlightColor = hexToRgb(document.getElementById('highlightColor').value);
             const showOutlines = document.getElementById('showOutlines').checked;
-            const minRegionSize = parseInt(document.getElementById('minRegionSize').value);
-
-            // Apply blur if needed
-            if (blurRadius > 0) {
-                beforeData = applyGaussianBlur(beforeData, afterImage.width, afterImage.height, blurRadius);
-                afterData = applyGaussianBlur(afterData, afterImage.width, afterImage.height, blurRadius);
-            }
-
-            const diffData = ctx.createImageData(afterImage.width, afterImage.height);
-            const diff = new Uint8Array(afterImage.width * afterImage.height);
-            
-            let numDiffPixels;
-
-            if (useBlockComparison) {
-                // Block-based comparison
-                numDiffPixels = blockCompare(
-                    beforeData.data,
-                    afterData.data,
-                    diff,
-                    afterImage.width,
-                    afterImage.height,
-                    blockSize,
-                    threshold
-                );
-            } else {
-                // Pixel-based comparison
-                numDiffPixels = pixelmatch(
-                    beforeData.data,
-                    afterData.data,
-                    diff,
-                    afterImage.width,
-                    afterImage.height,
-                    { threshold: threshold, includeAA: true }
-                );
-            }
 
             // Calculate percentage of change
-            const totalPixels = afterImage.width * afterImage.height;
+            const totalPixels = canvas.width * canvas.height;
             const changePercent = ((numDiffPixels / totalPixels) * 100).toFixed(2);
 
             if (currentMode === 'overlay') {
                 // Overlay mode: show after image with highlighted differences
                 ctx.drawImage(afterImage, 0, 0);
 
-                // Apply morphological operations to clean up noise and group regions
-                const processed = applyMorphology(diff, afterImage.width, afterImage.height, minRegionSize);
-
                 // Create overlay
-                const overlayData = ctx.getImageData(0, 0, afterImage.width, afterImage.height);
+                const overlayData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 
                 for (let i = 0; i < processed.length; i++) {
                     if (processed[i] > 0) {
@@ -1123,18 +1275,18 @@
 
                 // Draw outlines if enabled
                 if (showOutlines) {
-                    drawOutlines(ctx, processed, afterImage.width, afterImage.height);
+                    drawOutlines(ctx, processed, canvas.width, canvas.height);
                 }
             } else {
                 // Heatmap mode: show difference intensity
                 ctx.drawImage(afterImage, 0, 0);
                 
-                const heatmapData = ctx.getImageData(0, 0, afterImage.width, afterImage.height);
+                const heatmapData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 
-                for (let i = 0; i < diff.length; i++) {
-                    if (diff[i] > 0) {
+                for (let i = 0; i < originalDiff.length; i++) {
+                    if (originalDiff[i] > 0) {
                         const pixelIndex = i * 4;
-                        const intensity = Math.min(255, diff[i] * 2);
+                        const intensity = Math.min(255, originalDiff[i] * 2);
                         const heatColor = intensityToHeatColor(intensity);
                         
                         // Blend with original
@@ -1156,6 +1308,17 @@
             // Update UI
             document.getElementById('statsText').textContent = 
                 `${changePercent}% of image changed (${numDiffPixels.toLocaleString()} pixels)`;
+            
+            // Show results
+            canvas.style.display = 'block';
+            document.getElementById('loadingContainer').classList.remove('active');
+            document.getElementById('legend').style.display = 'flex';
+            document.getElementById('magnifierToggle').style.display = 'block';
+            
+            // Re-enable process button
+            const processBtn = document.getElementById('processBtn');
+            processBtn.disabled = false;
+            processBtn.textContent = 'Generate Comparison';
         }
 
         function applyGaussianBlur(imageData, width, height, radius) {
