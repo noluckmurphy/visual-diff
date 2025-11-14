@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Diff - Interior Design Comparison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .upload-box {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .upload-box:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .upload-box.has-image {
+            border-color: #4caf50;
+            background: #f1f8f4;
+        }
+
+        .upload-box h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .upload-box p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .upload-box input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #5568d3;
+        }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .controls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .controls-header h2 {
+            color: #333;
+            font-size: 20px;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-group label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .control-row input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .control-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-row input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-row span {
+            min-width: 50px;
+            text-align: right;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .control-row input[type="color"] {
+            width: 60px;
+            height: 36px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .output-section {
+            margin-top: 30px;
+        }
+
+        .output-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .output-container {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f0f0f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .output-canvas {
+            max-width: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            font-size: 16px;
+        }
+
+        .loading-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            gap: 20px;
+        }
+
+        .loading-container.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #667eea;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .loading-progress {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 2px solid #ddd;
+        }
+
+        .magnifier {
+            position: fixed;
+            width: 400px;
+            height: 200px;
+            pointer-events: none;
+            z-index: 10000;
+            display: none;
+            filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.3));
+        }
+
+        .magnifier.active {
+            display: block;
+        }
+
+        .magnifier-container {
+            display: flex;
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .magnifier-pane {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .magnifier-pane canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .magnifier-label {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            z-index: 1;
+        }
+
+        .magnifier-divider {
+            width: 2px;
+            background: #667eea;
+        }
+
+        .magnifier-crosshair {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+
+        .magnifier-toggle {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #667eea;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .magnifier-toggle:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .magnifier-toggle.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .process-btn {
+            background: #4caf50;
+            color: white;
+            padding: 12px 32px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+            margin-top: 20px;
+        }
+
+        .process-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+        }
+
+        .process-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Visual Diff Tool</h1>
+        <p class="subtitle">Compare before and after images with intelligent difference highlighting</p>
+
+        <div class="info-box">
+            <strong>🎯 Tips for AI-generated image comparisons:</strong><br>
+            • Start with <strong>Sensitivity = 0.5-1.0</strong> to ignore AI noise and JPEG artifacts<br>
+            • Use <strong>Blur = 2-5px</strong> to smooth out texture regeneration differences<br>
+            • Enable <strong>Block Comparison</strong> to focus on regional color changes instead of pixel-perfect matching<br>
+            • If you see 99% differences, increase sensitivity and blur until only real changes show
+        </div>
+
+        <div class="info-box" id="imageMetadata" style="display: none; background: #fff3cd; border-left-color: #ffc107;">
+            <strong>📊 Image Information:</strong><br>
+            <div id="metadataContent"></div>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-box" id="beforeBox">
+                <h3>Before Image</h3>
+                <p>Click to upload the original image</p>
+                <input type="file" id="beforeInput" accept="image/*">
+                <button class="upload-btn" onclick="document.getElementById('beforeInput').click()">
+                    Choose File
+                </button>
+                <img id="beforePreview" class="preview-img" style="display: none;">
+            </div>
+
+            <div class="upload-box" id="afterBox">
+                <h3>After Image</h3>
+                <p>Click to upload the modified image</p>
+                <input type="file" id="afterInput" accept="image/*">
+                <button class="upload-btn" onclick="document.getElementById('afterInput').click()">
+                    Choose File
+                </button>
+                <img id="afterPreview" class="preview-img" style="display: none;">
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: -15px; margin-bottom: 30px;">
+            <input type="file" id="bothInput" accept="image/*" multiple style="display: none;">
+            <a href="#" id="bothLink" style="color: #667eea; text-decoration: none; font-size: 14px; font-weight: 500;">
+                or choose both files at once
+            </a>
+        </div>
+
+        <div class="controls-section">
+            <div class="controls-header">
+                <h2>⚙️ Comparison Settings</h2>
+                <div class="mode-toggle">
+                    <button class="mode-btn active" data-mode="overlay">Overlay Mode</button>
+                    <button class="mode-btn" data-mode="heatmap">Heatmap Mode</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Sensitivity (higher = more forgiving, ignore subtle AI variations)</label>
+                <div class="control-row">
+                    <input type="range" id="threshold" min="0.05" max="2.0" step="0.05" value="0.5">
+                    <span id="thresholdValue">0.5</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Blur Radius (smooths textures before comparing)</label>
+                <div class="control-row">
+                    <input type="range" id="blurRadius" min="0" max="10" step="1" value="2">
+                    <span id="blurRadiusValue">2px</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="useBlockComparison">
+                    <label for="useBlockComparison" style="margin-bottom: 0;">Use block comparison (less sensitive to texture changes)</label>
+                </div>
+            </div>
+
+            <div class="control-group" id="blockSizeControl" style="display: none;">
+                <label>Block Size</label>
+                <div class="control-row">
+                    <input type="range" id="blockSize" min="4" max="32" step="4" value="16">
+                    <span id="blockSizeValue">16px</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Overlay Opacity</label>
+                <div class="control-row">
+                    <input type="range" id="opacity" min="0.1" max="1" step="0.05" value="0.5">
+                    <span id="opacityValue">0.5</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Change Highlight Color</label>
+                <div class="control-row">
+                    <input type="color" id="highlightColor" value="#ff6b6b">
+                    <span>Red = Changed</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Minimum Change Region Size (pixels)</label>
+                <div class="control-row">
+                    <input type="range" id="minRegionSize" min="1" max="100" step="1" value="10">
+                    <span id="minRegionSizeValue">10</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="showOutlines" checked>
+                    <label for="showOutlines" style="margin-bottom: 0;">Draw outlines around changed regions</label>
+                </div>
+            </div>
+
+            <button class="process-btn" id="processBtn" disabled>
+                Generate Comparison
+            </button>
+        </div>
+
+        <div class="output-section">
+            <h2>📊 Comparison Result</h2>
+            <div class="output-container" id="outputContainer">
+                <canvas id="outputCanvas" class="output-canvas"></canvas>
+                <div id="statusMessage" class="status-message">
+                    Upload both images to begin
+                </div>
+                <div id="loadingContainer" class="loading-container">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Processing images...</div>
+                    <div class="loading-progress" id="loadingProgress">Analyzing differences</div>
+                </div>
+                <button class="magnifier-toggle" id="magnifierToggle" style="display: none;">
+                    🔍 Enable Magnifier
+                </button>
+            </div>
+            <div class="magnifier" id="magnifier">
+                <div class="magnifier-container">
+                    <div class="magnifier-pane">
+                        <div class="magnifier-label">Before</div>
+                        <canvas id="magnifierBefore"></canvas>
+                        <div class="magnifier-crosshair"></div>
+                    </div>
+                    <div class="magnifier-divider"></div>
+                    <div class="magnifier-pane">
+                        <div class="magnifier-label">After</div>
+                        <canvas id="magnifierAfter"></canvas>
+                        <div class="magnifier-crosshair"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="legend" id="legend" style="display: none;">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ff6b6b;"></div>
+                    <span>Changed Areas</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(0,0,0,0);"></div>
+                    <span>Unchanged Areas</span>
+                </div>
+                <div class="legend-item">
+                    <span id="statsText"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Pixelmatch implementation (inline to avoid CDN issues)
+        function pixelmatch(img1, img2, output, width, height, options) {
+            options = options || {};
+            const threshold = options.threshold === undefined ? 0.1 : options.threshold;
+            const includeAA = options.includeAA !== undefined ? options.includeAA : true;
+
+            let diff = 0;
+            
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const pos = (y * width + x) * 4;
+                    
+                    // Get RGB values
+                    const r1 = img1[pos];
+                    const g1 = img1[pos + 1];
+                    const b1 = img1[pos + 2];
+                    const a1 = img1[pos + 3];
+                    
+                    const r2 = img2[pos];
+                    const g2 = img2[pos + 1];
+                    const b2 = img2[pos + 2];
+                    const a2 = img2[pos + 3];
+                    
+                    // If alpha channels are different, consider it different
+                    if (Math.abs(a1 - a2) > 1) {
+                        if (output) {
+                            output[y * width + x] = 255;
+                        }
+                        diff++;
+                        continue;
+                    }
+                    
+                    // Calculate color difference using YIQ color space
+                    const yDiff = rgbToY(r1, g1, b1) - rgbToY(r2, g2, b2);
+                    const iDiff = rgbToI(r1, g1, b1) - rgbToI(r2, g2, b2);
+                    const qDiff = rgbToQ(r1, g1, b1) - rgbToQ(r2, g2, b2);
+                    
+                    const delta = Math.sqrt(yDiff * yDiff + iDiff * iDiff + qDiff * qDiff);
+                    
+                    if (delta > threshold) {
+                        if (output) {
+                            output[y * width + x] = Math.min(255, Math.floor(delta * 255));
+                        }
+                        diff++;
+                    } else if (output) {
+                        output[y * width + x] = 0;
+                    }
+                }
+            }
+            
+            return diff;
+        }
+        
+        // YIQ color space conversion for better perceptual difference detection
+        function rgbToY(r, g, b) {
+            return r * 0.29889531 + g * 0.58662247 + b * 0.11448223;
+        }
+        
+        function rgbToI(r, g, b) {
+            return r * 0.59597799 - g * 0.27417610 - b * 0.32180189;
+        }
+        
+        function rgbToQ(r, g, b) {
+            return r * 0.21147017 - g * 0.52261711 + b * 0.31114694;
+        }
+
+        let beforeImage = null;
+        let afterImage = null;
+        let currentMode = 'overlay';
+        let magnifierEnabled = false;
+        let beforeCanvasData = null;
+        let afterCanvasData = null;
+
+        // Image upload handlers
+        document.getElementById('beforeInput').addEventListener('change', (e) => {
+            handleImageUpload(e, 'before');
+        });
+
+        document.getElementById('afterInput').addEventListener('change', (e) => {
+            handleImageUpload(e, 'after');
+        });
+
+        // Both files at once handler
+        document.getElementById('bothLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('bothInput').click();
+        });
+
+        document.getElementById('bothInput').addEventListener('change', (e) => {
+            const files = e.target.files;
+            
+            if (files.length === 0) {
+                return;
+            }
+            
+            if (files.length === 1) {
+                alert('Please select 2 images. First will be "Before", second will be "After".');
+                return;
+            }
+            
+            if (files.length > 2) {
+                console.log(`User selected ${files.length} files. Using first 2, ignoring the rest.`);
+            }
+            
+            // Load first file as "before"
+            loadFileAsImage(files[0], 'before');
+            
+            // Load second file as "after"
+            loadFileAsImage(files[1], 'after');
+            
+            // Clear the input so the same files can be selected again if needed
+            e.target.value = '';
+        });
+
+        function loadFileAsImage(file, type) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    if (type === 'before') {
+                        beforeImage = img;
+                        beforeImage.fileType = file.type;
+                        beforeImage.fileName = file.name;
+                        beforeImage.fileSize = file.size;
+                        document.getElementById('beforePreview').src = e.target.result;
+                        document.getElementById('beforePreview').style.display = 'block';
+                        document.getElementById('beforeBox').classList.add('has-image');
+                    } else {
+                        afterImage = img;
+                        afterImage.fileType = file.type;
+                        afterImage.fileName = file.name;
+                        afterImage.fileSize = file.size;
+                        document.getElementById('afterPreview').src = e.target.result;
+                        document.getElementById('afterPreview').style.display = 'block';
+                        document.getElementById('afterBox').classList.add('has-image');
+                    }
+                    checkIfReadyToProcess();
+                    updateImageMetadata();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleImageUpload(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+            loadFileAsImage(file, type);
+        }
+
+        function updateImageMetadata() {
+            if (!beforeImage || !afterImage) return;
+
+            const metadataBox = document.getElementById('imageMetadata');
+            const metadataContent = document.getElementById('metadataContent');
+            
+            const beforeFormat = beforeImage.fileType || 'unknown';
+            const afterFormat = afterImage.fileType || 'unknown';
+            const beforeSize = (beforeImage.fileSize / 1024).toFixed(1);
+            const afterSize = (afterImage.fileSize / 1024).toFixed(1);
+            
+            const formatMismatch = beforeFormat !== afterFormat;
+            const sizeMismatch = beforeImage.width !== afterImage.width || beforeImage.height !== afterImage.height;
+            
+            let warnings = [];
+            if (formatMismatch) {
+                warnings.push(`⚠️ Different formats (${beforeFormat} vs ${afterFormat}) - may cause compression artifacts`);
+            }
+            if (beforeFormat.includes('jpeg') || afterFormat.includes('jpeg') || 
+                beforeFormat.includes('webp') || afterFormat.includes('webp')) {
+                warnings.push(`⚠️ Lossy compression detected - expect high difference rates even for similar images`);
+            }
+            if (sizeMismatch) {
+                warnings.push(`⚠️ Different dimensions - before will be resized to match after`);
+            }
+            
+            let html = `
+                <strong>Before:</strong> ${beforeImage.fileName} (${beforeImage.width}×${beforeImage.height}, ${beforeFormat}, ${beforeSize}KB)<br>
+                <strong>After:</strong> ${afterImage.fileName} (${afterImage.width}×${afterImage.height}, ${afterFormat}, ${afterSize}KB)
+            `;
+            
+            if (warnings.length > 0) {
+                html += '<br><br>' + warnings.join('<br>');
+                html += '<br><br><strong>💡 Recommendation:</strong> Increase Sensitivity to 0.8+ and enable Blur (3-5px) to compensate for compression differences';
+            }
+            
+            metadataContent.innerHTML = html;
+            metadataBox.style.display = 'block';
+        }
+
+        function checkIfReadyToProcess() {
+            const processBtn = document.getElementById('processBtn');
+            if (beforeImage && afterImage) {
+                processBtn.disabled = false;
+            }
+        }
+
+        // Control value updates
+        document.getElementById('threshold').addEventListener('input', (e) => {
+            document.getElementById('thresholdValue').textContent = e.target.value;
+        });
+
+        document.getElementById('opacity').addEventListener('input', (e) => {
+            document.getElementById('opacityValue').textContent = e.target.value;
+        });
+
+        document.getElementById('minRegionSize').addEventListener('input', (e) => {
+            document.getElementById('minRegionSizeValue').textContent = e.target.value;
+        });
+
+        document.getElementById('blurRadius').addEventListener('input', (e) => {
+            document.getElementById('blurRadiusValue').textContent = e.target.value + 'px';
+        });
+
+        document.getElementById('blockSize').addEventListener('input', (e) => {
+            document.getElementById('blockSizeValue').textContent = e.target.value + 'px';
+        });
+
+        document.getElementById('useBlockComparison').addEventListener('change', (e) => {
+            document.getElementById('blockSizeControl').style.display = e.target.checked ? 'block' : 'none';
+        });
+
+        // Mode toggle
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                currentMode = e.target.dataset.mode;
+            });
+        });
+
+        // Magnifier toggle
+        document.getElementById('magnifierToggle').addEventListener('click', (e) => {
+            magnifierEnabled = !magnifierEnabled;
+            const magnifier = document.getElementById('magnifier');
+            const toggle = document.getElementById('magnifierToggle');
+            
+            if (magnifierEnabled) {
+                toggle.classList.add('active');
+                toggle.textContent = '🔍 Disable Magnifier';
+            } else {
+                toggle.classList.remove('active');
+                toggle.textContent = '🔍 Enable Magnifier';
+                magnifier.classList.remove('active');
+            }
+        });
+
+        // Setup magnifier mouse tracking
+        function setupMagnifier() {
+            const outputContainer = document.getElementById('outputContainer');
+            const canvas = document.getElementById('outputCanvas');
+            const magnifier = document.getElementById('magnifier');
+            const magnifierBefore = document.getElementById('magnifierBefore');
+            const magnifierAfter = document.getElementById('magnifierAfter');
+            
+            // Set magnifier canvas sizes (200x200 at 2x zoom = 100x100 source area)
+            magnifierBefore.width = 200;
+            magnifierBefore.height = 200;
+            magnifierAfter.width = 200;
+            magnifierAfter.height = 200;
+            
+            outputContainer.addEventListener('mousemove', (e) => {
+                if (!magnifierEnabled || !beforeCanvasData || !afterCanvasData) return;
+                
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                
+                // Get mouse position relative to canvas
+                const mouseX = (e.clientX - rect.left) * scaleX;
+                const mouseY = (e.clientY - rect.top) * scaleY;
+                
+                // Check if mouse is within canvas bounds
+                if (mouseX < 0 || mouseX > canvas.width || mouseY < 0 || mouseY > canvas.height) {
+                    magnifier.classList.remove('active');
+                    return;
+                }
+                
+                // Show magnifier
+                magnifier.classList.add('active');
+                
+                // Position magnifier 20px above cursor, centered
+                const magnifierX = e.clientX - 200; // Center the 400px width
+                const magnifierY = e.clientY - 220; // 20px above cursor
+                
+                // Keep magnifier on screen
+                const clampedX = Math.max(10, Math.min(magnifierX, window.innerWidth - 410));
+                const clampedY = Math.max(10, magnifierY);
+                
+                magnifier.style.left = clampedX + 'px';
+                magnifier.style.top = clampedY + 'px';
+                
+                // Draw magnified areas (100x100 source area, scaled to 200x200)
+                const ctxBefore = magnifierBefore.getContext('2d');
+                const ctxAfter = magnifierAfter.getContext('2d');
+                
+                // Clear canvases
+                ctxBefore.clearRect(0, 0, 200, 200);
+                ctxAfter.clearRect(0, 0, 200, 200);
+                
+                // Calculate source area (100x100 centered on cursor)
+                const sourceSize = 100;
+                const halfSize = sourceSize / 2;
+                let sourceX = Math.floor(mouseX - halfSize);
+                let sourceY = Math.floor(mouseY - halfSize);
+                
+                // Clamp source coordinates
+                sourceX = Math.max(0, Math.min(sourceX, canvas.width - sourceSize));
+                sourceY = Math.max(0, Math.min(sourceY, canvas.height - sourceSize));
+                
+                // Draw magnified sections (2x zoom)
+                ctxBefore.imageSmoothingEnabled = false;
+                ctxAfter.imageSmoothingEnabled = false;
+                
+                ctxBefore.drawImage(
+                    beforeCanvasData,
+                    sourceX, sourceY, sourceSize, sourceSize,
+                    0, 0, 200, 200
+                );
+                
+                ctxAfter.drawImage(
+                    afterCanvasData,
+                    sourceX, sourceY, sourceSize, sourceSize,
+                    0, 0, 200, 200
+                );
+            });
+            
+            outputContainer.addEventListener('mouseleave', () => {
+                magnifier.classList.remove('active');
+            });
+        }
+
+        // Process button
+        document.getElementById('processBtn').addEventListener('click', () => {
+            // Show loading state
+            const canvas = document.getElementById('outputCanvas');
+            const statusMessage = document.getElementById('statusMessage');
+            const loadingContainer = document.getElementById('loadingContainer');
+            const legend = document.getElementById('legend');
+            const processBtn = document.getElementById('processBtn');
+            
+            // Hide canvas and status, show loading
+            canvas.style.display = 'none';
+            statusMessage.style.display = 'none';
+            legend.style.display = 'none';
+            loadingContainer.classList.add('active');
+            processBtn.disabled = true;
+            processBtn.textContent = 'Processing...';
+            
+            // Use setTimeout to allow UI to update before heavy processing
+            setTimeout(() => {
+                try {
+                    processImages();
+                    
+                    // Store canvas data for magnifier
+                    const tempBeforeCanvas = document.createElement('canvas');
+                    const tempAfterCanvas = document.createElement('canvas');
+                    tempBeforeCanvas.width = afterImage.width;
+                    tempBeforeCanvas.height = afterImage.height;
+                    tempAfterCanvas.width = afterImage.width;
+                    tempAfterCanvas.height = afterImage.height;
+                    
+                    const tempBeforeCtx = tempBeforeCanvas.getContext('2d');
+                    const tempAfterCtx = tempAfterCanvas.getContext('2d');
+                    
+                    tempBeforeCtx.drawImage(beforeImage, 0, 0, afterImage.width, afterImage.height);
+                    tempAfterCtx.drawImage(afterImage, 0, 0);
+                    
+                    beforeCanvasData = tempBeforeCanvas;
+                    afterCanvasData = tempAfterCanvas;
+                    
+                    // Show results
+                    canvas.style.display = 'block';
+                    loadingContainer.classList.remove('active');
+                    legend.style.display = 'flex';
+                    
+                    // Show magnifier toggle button
+                    document.getElementById('magnifierToggle').style.display = 'block';
+                } catch (error) {
+                    console.error('Error processing images:', error);
+                    statusMessage.textContent = 'Error processing images. Please try again.';
+                    statusMessage.style.display = 'block';
+                    loadingContainer.classList.remove('active');
+                } finally {
+                    processBtn.disabled = false;
+                    processBtn.textContent = 'Generate Comparison';
+                }
+            }, 50);
+        });
+
+        function processImages() {
+            if (!beforeImage || !afterImage) return;
+
+            const canvas = document.getElementById('outputCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to match after image
+            canvas.width = afterImage.width;
+            canvas.height = afterImage.height;
+
+            // Create temporary canvases for before and after
+            const beforeCanvas = document.createElement('canvas');
+            const afterCanvas = document.createElement('canvas');
+            beforeCanvas.width = afterImage.width;
+            beforeCanvas.height = afterImage.height;
+            afterCanvas.width = afterImage.width;
+            afterCanvas.height = afterImage.height;
+
+            const beforeCtx = beforeCanvas.getContext('2d');
+            const afterCtx = afterCanvas.getContext('2d');
+
+            // Draw images (resize before image if needed)
+            beforeCtx.drawImage(beforeImage, 0, 0, afterImage.width, afterImage.height);
+            afterCtx.drawImage(afterImage, 0, 0);
+
+            // Get image data
+            let beforeData = beforeCtx.getImageData(0, 0, afterImage.width, afterImage.height);
+            let afterData = afterCtx.getImageData(0, 0, afterImage.width, afterImage.height);
+
+            // Get settings
+            const threshold = parseFloat(document.getElementById('threshold').value);
+            const blurRadius = parseInt(document.getElementById('blurRadius').value);
+            const useBlockComparison = document.getElementById('useBlockComparison').checked;
+            const blockSize = parseInt(document.getElementById('blockSize').value);
+            const opacity = parseFloat(document.getElementById('opacity').value);
+            const highlightColor = hexToRgb(document.getElementById('highlightColor').value);
+            const showOutlines = document.getElementById('showOutlines').checked;
+            const minRegionSize = parseInt(document.getElementById('minRegionSize').value);
+
+            // Apply blur if needed
+            if (blurRadius > 0) {
+                beforeData = applyGaussianBlur(beforeData, afterImage.width, afterImage.height, blurRadius);
+                afterData = applyGaussianBlur(afterData, afterImage.width, afterImage.height, blurRadius);
+            }
+
+            const diffData = ctx.createImageData(afterImage.width, afterImage.height);
+            const diff = new Uint8Array(afterImage.width * afterImage.height);
+            
+            let numDiffPixels;
+
+            if (useBlockComparison) {
+                // Block-based comparison
+                numDiffPixels = blockCompare(
+                    beforeData.data,
+                    afterData.data,
+                    diff,
+                    afterImage.width,
+                    afterImage.height,
+                    blockSize,
+                    threshold
+                );
+            } else {
+                // Pixel-based comparison
+                numDiffPixels = pixelmatch(
+                    beforeData.data,
+                    afterData.data,
+                    diff,
+                    afterImage.width,
+                    afterImage.height,
+                    { threshold: threshold, includeAA: true }
+                );
+            }
+
+            // Calculate percentage of change
+            const totalPixels = afterImage.width * afterImage.height;
+            const changePercent = ((numDiffPixels / totalPixels) * 100).toFixed(2);
+
+            if (currentMode === 'overlay') {
+                // Overlay mode: show after image with highlighted differences
+                ctx.drawImage(afterImage, 0, 0);
+
+                // Apply morphological operations to clean up noise and group regions
+                const processed = applyMorphology(diff, afterImage.width, afterImage.height, minRegionSize);
+
+                // Create overlay
+                const overlayData = ctx.getImageData(0, 0, afterImage.width, afterImage.height);
+                
+                for (let i = 0; i < processed.length; i++) {
+                    if (processed[i] > 0) {
+                        const pixelIndex = i * 4;
+                        // Blend highlight color with original
+                        overlayData.data[pixelIndex] = Math.floor(
+                            overlayData.data[pixelIndex] * (1 - opacity) + highlightColor.r * opacity
+                        );
+                        overlayData.data[pixelIndex + 1] = Math.floor(
+                            overlayData.data[pixelIndex + 1] * (1 - opacity) + highlightColor.g * opacity
+                        );
+                        overlayData.data[pixelIndex + 2] = Math.floor(
+                            overlayData.data[pixelIndex + 2] * (1 - opacity) + highlightColor.b * opacity
+                        );
+                    }
+                }
+
+                ctx.putImageData(overlayData, 0, 0);
+
+                // Draw outlines if enabled
+                if (showOutlines) {
+                    drawOutlines(ctx, processed, afterImage.width, afterImage.height);
+                }
+            } else {
+                // Heatmap mode: show difference intensity
+                ctx.drawImage(afterImage, 0, 0);
+                
+                const heatmapData = ctx.getImageData(0, 0, afterImage.width, afterImage.height);
+                
+                for (let i = 0; i < diff.length; i++) {
+                    if (diff[i] > 0) {
+                        const pixelIndex = i * 4;
+                        const intensity = Math.min(255, diff[i] * 2);
+                        const heatColor = intensityToHeatColor(intensity);
+                        
+                        // Blend with original
+                        heatmapData.data[pixelIndex] = Math.floor(
+                            heatmapData.data[pixelIndex] * (1 - opacity) + heatColor.r * opacity
+                        );
+                        heatmapData.data[pixelIndex + 1] = Math.floor(
+                            heatmapData.data[pixelIndex + 1] * (1 - opacity) + heatColor.g * opacity
+                        );
+                        heatmapData.data[pixelIndex + 2] = Math.floor(
+                            heatmapData.data[pixelIndex + 2] * (1 - opacity) + heatColor.b * opacity
+                        );
+                    }
+                }
+                
+                ctx.putImageData(heatmapData, 0, 0);
+            }
+
+            // Update UI
+            document.getElementById('statsText').textContent = 
+                `${changePercent}% of image changed (${numDiffPixels.toLocaleString()} pixels)`;
+        }
+
+        function applyGaussianBlur(imageData, width, height, radius) {
+            // Simple box blur approximation (faster than true Gaussian)
+            const data = new Uint8ClampedArray(imageData.data);
+            const result = new ImageData(width, height);
+            
+            const kernelSize = radius * 2 + 1;
+            const kernelSum = kernelSize * kernelSize;
+            
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    let r = 0, g = 0, b = 0, a = 0;
+                    let count = 0;
+                    
+                    for (let ky = -radius; ky <= radius; ky++) {
+                        for (let kx = -radius; kx <= radius; kx++) {
+                            const px = x + kx;
+                            const py = y + ky;
+                            
+                            if (px >= 0 && px < width && py >= 0 && py < height) {
+                                const idx = (py * width + px) * 4;
+                                r += data[idx];
+                                g += data[idx + 1];
+                                b += data[idx + 2];
+                                a += data[idx + 3];
+                                count++;
+                            }
+                        }
+                    }
+                    
+                    const idx = (y * width + x) * 4;
+                    result.data[idx] = Math.floor(r / count);
+                    result.data[idx + 1] = Math.floor(g / count);
+                    result.data[idx + 2] = Math.floor(b / count);
+                    result.data[idx + 3] = Math.floor(a / count);
+                }
+            }
+            
+            return result;
+        }
+
+        function blockCompare(img1, img2, output, width, height, blockSize, threshold) {
+            let diffBlocks = 0;
+            
+            for (let by = 0; by < height; by += blockSize) {
+                for (let bx = 0; bx < width; bx += blockSize) {
+                    // Calculate average color for this block in both images
+                    let r1_sum = 0, g1_sum = 0, b1_sum = 0;
+                    let r2_sum = 0, g2_sum = 0, b2_sum = 0;
+                    let pixelCount = 0;
+                    
+                    for (let y = by; y < Math.min(by + blockSize, height); y++) {
+                        for (let x = bx; x < Math.min(bx + blockSize, width); x++) {
+                            const pos = (y * width + x) * 4;
+                            
+                            r1_sum += img1[pos];
+                            g1_sum += img1[pos + 1];
+                            b1_sum += img1[pos + 2];
+                            
+                            r2_sum += img2[pos];
+                            g2_sum += img2[pos + 1];
+                            b2_sum += img2[pos + 2];
+                            
+                            pixelCount++;
+                        }
+                    }
+                    
+                    // Calculate average colors
+                    const r1 = r1_sum / pixelCount;
+                    const g1 = g1_sum / pixelCount;
+                    const b1 = b1_sum / pixelCount;
+                    
+                    const r2 = r2_sum / pixelCount;
+                    const g2 = g2_sum / pixelCount;
+                    const b2 = b2_sum / pixelCount;
+                    
+                    // Calculate block difference
+                    const yDiff = rgbToY(r1, g1, b1) - rgbToY(r2, g2, b2);
+                    const iDiff = rgbToI(r1, g1, b1) - rgbToI(r2, g2, b2);
+                    const qDiff = rgbToQ(r1, g1, b1) - rgbToQ(r2, g2, b2);
+                    
+                    const delta = Math.sqrt(yDiff * yDiff + iDiff * iDiff + qDiff * qDiff);
+                    
+                    const isDifferent = delta > threshold;
+                    
+                    // Mark all pixels in this block
+                    for (let y = by; y < Math.min(by + blockSize, height); y++) {
+                        for (let x = bx; x < Math.min(bx + blockSize, width); x++) {
+                            const idx = y * width + x;
+                            output[idx] = isDifferent ? 255 : 0;
+                        }
+                    }
+                    
+                    if (isDifferent) {
+                        diffBlocks += pixelCount;
+                    }
+                }
+            }
+            
+            return diffBlocks;
+        }
+
+        function applyMorphology(diff, width, height, minSize) {
+            // Simple morphological closing to group nearby changed pixels
+            const result = new Uint8Array(diff);
+            const kernel = 3; // 3x3 kernel
+            const offset = Math.floor(kernel / 2);
+
+            // Dilation
+            const dilated = new Uint8Array(diff.length);
+            for (let y = offset; y < height - offset; y++) {
+                for (let x = offset; x < width - offset; x++) {
+                    let maxVal = 0;
+                    for (let ky = -offset; ky <= offset; ky++) {
+                        for (let kx = -offset; kx <= offset; kx++) {
+                            const idx = (y + ky) * width + (x + kx);
+                            maxVal = Math.max(maxVal, diff[idx]);
+                        }
+                    }
+                    dilated[y * width + x] = maxVal;
+                }
+            }
+
+            // Filter out small regions
+            const labeled = labelRegions(dilated, width, height);
+            const regionSizes = new Map();
+            
+            labeled.forEach(label => {
+                if (label > 0) {
+                    regionSizes.set(label, (regionSizes.get(label) || 0) + 1);
+                }
+            });
+
+            // Remove small regions
+            for (let i = 0; i < labeled.length; i++) {
+                const label = labeled[i];
+                if (label > 0 && regionSizes.get(label) < minSize) {
+                    result[i] = 0;
+                } else if (label > 0) {
+                    result[i] = 255;
+                }
+            }
+
+            return result;
+        }
+
+        function labelRegions(data, width, height) {
+            // Simple connected components labeling
+            const labels = new Uint32Array(data.length);
+            let nextLabel = 1;
+
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] > 0 && labels[i] === 0) {
+                    floodFill(data, labels, width, height, i, nextLabel);
+                    nextLabel++;
+                }
+            }
+
+            return labels;
+        }
+
+        function floodFill(data, labels, width, height, start, label) {
+            const stack = [start];
+            
+            while (stack.length > 0) {
+                const idx = stack.pop();
+                if (labels[idx] !== 0 || data[idx] === 0) continue;
+                
+                labels[idx] = label;
+                const x = idx % width;
+                const y = Math.floor(idx / width);
+
+                // Check 4-connected neighbors
+                if (x > 0) stack.push(idx - 1);
+                if (x < width - 1) stack.push(idx + 1);
+                if (y > 0) stack.push(idx - width);
+                if (y < height - 1) stack.push(idx + width);
+            }
+        }
+
+        function drawOutlines(ctx, processed, width, height) {
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = 3;
+
+            // Simple edge detection - draw line where diff changes from 0 to non-zero
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    const idx = y * width + x;
+                    if (processed[idx] > 0) {
+                        // Check if any neighbor is 0 (edge pixel)
+                        const neighbors = [
+                            processed[idx - 1],
+                            processed[idx + 1],
+                            processed[idx - width],
+                            processed[idx + width]
+                        ];
+                        
+                        if (neighbors.some(n => n === 0)) {
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillRect(x, y, 1, 1);
+                        }
+                    }
+                }
+            }
+            
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : { r: 255, g: 107, b: 107 };
+        }
+
+        function intensityToHeatColor(intensity) {
+            // Blue -> Cyan -> Green -> Yellow -> Red heatmap
+            const normalized = intensity / 255;
+            
+            if (normalized < 0.25) {
+                // Blue to Cyan
+                const t = normalized / 0.25;
+                return { r: 0, g: Math.floor(255 * t), b: 255 };
+            } else if (normalized < 0.5) {
+                // Cyan to Green
+                const t = (normalized - 0.25) / 0.25;
+                return { r: 0, g: 255, b: Math.floor(255 * (1 - t)) };
+            } else if (normalized < 0.75) {
+                // Green to Yellow
+                const t = (normalized - 0.5) / 0.25;
+                return { r: Math.floor(255 * t), g: 255, b: 0 };
+            } else {
+                // Yellow to Red
+                const t = (normalized - 0.75) / 0.25;
+                return { r: 255, g: Math.floor(255 * (1 - t)), b: 0 };
+            }
+        }
+
+        // Initialize magnifier
+        setupMagnifier();
+    </script>
+</body>
+</html>
