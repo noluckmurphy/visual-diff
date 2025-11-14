@@ -573,6 +573,27 @@
                 </div>
             </div>
 
+            <div class="control-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="autoAlign">
+                    <label for="autoAlign" style="margin-bottom: 0;">Auto-align images (detect and correct crop/position differences)</label>
+                </div>
+            </div>
+
+            <div class="control-group" id="manualAlignmentControl" style="display: none;">
+                <label>Manual Alignment (X, Y offset in pixels)</label>
+                <div class="control-row">
+                    <label style="min-width: 30px; margin: 0;">X:</label>
+                    <input type="range" id="alignX" min="-100" max="100" step="1" value="0">
+                    <span id="alignXValue" style="min-width: 50px;">0</span>
+                </div>
+                <div class="control-row" style="margin-top: 10px;">
+                    <label style="min-width: 30px; margin: 0;">Y:</label>
+                    <input type="range" id="alignY" min="-100" max="100" step="1" value="0">
+                    <span id="alignYValue" style="min-width: 50px;">0</span>
+                </div>
+            </div>
+
             <button class="process-btn" id="processBtn" disabled>
                 Generate Comparison
             </button>
@@ -698,6 +719,7 @@
         let magnifierEnabled = false;
         let beforeCanvasData = null;
         let afterCanvasData = null;
+        let alignmentOffset = { x: 0, y: 0 };
 
         // Image upload handlers
         document.getElementById('beforeInput').addEventListener('change', (e) => {
@@ -846,6 +868,23 @@
 
         document.getElementById('useBlockComparison').addEventListener('change', (e) => {
             document.getElementById('blockSizeControl').style.display = e.target.checked ? 'block' : 'none';
+        });
+
+        document.getElementById('alignX').addEventListener('input', (e) => {
+            document.getElementById('alignXValue').textContent = e.target.value;
+        });
+
+        document.getElementById('alignY').addEventListener('input', (e) => {
+            document.getElementById('alignYValue').textContent = e.target.value;
+        });
+
+        document.getElementById('autoAlign').addEventListener('change', (e) => {
+            const manualControl = document.getElementById('manualAlignmentControl');
+            if (e.target.checked) {
+                manualControl.style.display = 'block';
+            } else {
+                manualControl.style.display = 'none';
+            }
         });
 
         // Mode toggle
@@ -1016,6 +1055,74 @@
             }, 50);
         });
 
+        // Image alignment using template matching
+        function findAlignmentOffset(img1Data, img2Data, width, height) {
+            const searchRange = 50; // Search ±50 pixels
+            const templateSize = Math.min(200, Math.floor(Math.min(width, height) * 0.2)); // 20% of image or 200px
+            
+            // Use center region as template
+            const templateX = Math.floor((width - templateSize) / 2);
+            const templateY = Math.floor((height - templateSize) / 2);
+            
+            let bestOffset = { x: 0, y: 0 };
+            let bestScore = Infinity;
+            
+            // Extract template from img1 (before image)
+            const template = new Uint8ClampedArray(templateSize * templateSize * 4);
+            for (let y = 0; y < templateSize; y++) {
+                for (let x = 0; x < templateSize; x++) {
+                    const srcIdx = ((templateY + y) * width + (templateX + x)) * 4;
+                    const dstIdx = (y * templateSize + x) * 4;
+                    template[dstIdx] = img1Data[srcIdx];
+                    template[dstIdx + 1] = img1Data[srcIdx + 1];
+                    template[dstIdx + 2] = img1Data[srcIdx + 2];
+                    template[dstIdx + 3] = img1Data[srcIdx + 3];
+                }
+            }
+            
+            // Search for best match in img2 (after image)
+            for (let dy = -searchRange; dy <= searchRange; dy += 2) { // Step by 2 for performance
+                for (let dx = -searchRange; dx <= searchRange; dx += 2) {
+                    const searchX = templateX + dx;
+                    const searchY = templateY + dy;
+                    
+                    // Check bounds
+                    if (searchX < 0 || searchY < 0 || 
+                        searchX + templateSize >= width || 
+                        searchY + templateSize >= height) {
+                        continue;
+                    }
+                    
+                    // Calculate sum of squared differences
+                    let ssd = 0;
+                    for (let y = 0; y < templateSize; y++) {
+                        for (let x = 0; x < templateSize; x++) {
+                            const templateIdx = (y * templateSize + x) * 4;
+                            const searchIdx = ((searchY + y) * width + (searchX + x)) * 4;
+                            
+                            const dr = template[templateIdx] - img2Data[searchIdx];
+                            const dg = template[templateIdx + 1] - img2Data[searchIdx + 1];
+                            const db = template[templateIdx + 2] - img2Data[searchIdx + 2];
+                            
+                            ssd += dr * dr + dg * dg + db * db;
+                        }
+                    }
+                    
+                    if (ssd < bestScore) {
+                        bestScore = ssd;
+                        bestOffset = { x: dx, y: dy };
+                    }
+                }
+            }
+            
+            return bestOffset;
+        }
+
+        function applyAlignment(ctx, image, offsetX, offsetY, targetWidth, targetHeight) {
+            ctx.clearRect(0, 0, targetWidth, targetHeight);
+            ctx.drawImage(image, offsetX, offsetY, targetWidth, targetHeight);
+        }
+
         function processImages() {
             if (!beforeImage || !afterImage) return;
 
@@ -1040,6 +1147,47 @@
             // Draw images (resize before image if needed)
             beforeCtx.drawImage(beforeImage, 0, 0, afterImage.width, afterImage.height);
             afterCtx.drawImage(afterImage, 0, 0);
+
+            // Handle alignment
+            const autoAlign = document.getElementById('autoAlign').checked;
+            const manualAlignX = parseInt(document.getElementById('alignX').value);
+            const manualAlignY = parseInt(document.getElementById('alignY').value);
+            
+            if (autoAlign || manualAlignX !== 0 || manualAlignY !== 0) {
+                let offsetX = manualAlignX;
+                let offsetY = manualAlignY;
+                
+                if (autoAlign) {
+                    // Perform automatic alignment
+                    const beforeData = beforeCtx.getImageData(0, 0, afterImage.width, afterImage.height);
+                    const afterData = afterCtx.getImageData(0, 0, afterImage.width, afterImage.height);
+                    
+                    const autoOffset = findAlignmentOffset(
+                        beforeData.data,
+                        afterData.data,
+                        afterImage.width,
+                        afterImage.height
+                    );
+                    
+                    offsetX = autoOffset.x;
+                    offsetY = autoOffset.y;
+                    alignmentOffset = { x: offsetX, y: offsetY };
+                    
+                    // Update manual controls to show detected offset
+                    document.getElementById('alignX').value = offsetX;
+                    document.getElementById('alignXValue').textContent = offsetX;
+                    document.getElementById('alignY').value = offsetY;
+                    document.getElementById('alignYValue').textContent = offsetY;
+                } else {
+                    alignmentOffset = { x: offsetX, y: offsetY };
+                }
+                
+                // Apply alignment to before image
+                beforeCtx.clearRect(0, 0, afterImage.width, afterImage.height);
+                beforeCtx.drawImage(beforeImage, offsetX, offsetY, afterImage.width, afterImage.height);
+            } else {
+                alignmentOffset = { x: 0, y: 0 };
+            }
 
             // Get image data
             let beforeData = beforeCtx.getImageData(0, 0, afterImage.width, afterImage.height);
