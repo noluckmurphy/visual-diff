@@ -595,6 +595,7 @@
                 <div class="mode-toggle">
                     <button class="mode-btn active" data-mode="overlay">Overlay Mode</button>
                     <button class="mode-btn" data-mode="heatmap">Heatmap Mode</button>
+                    <button class="mode-btn" data-mode="intensity">Intensity Mode</button>
                 </div>
             </div>
 
@@ -611,6 +612,21 @@
                 <div class="control-row">
                     <input type="range" id="blurRadius" min="0" max="10" step="1" value="2">
                     <span id="blurRadiusValue">2px</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="useFlexibleMatching">
+                    <label for="useFlexibleMatching" style="margin-bottom: 0;">Enable flexible matching (perceptual similarity, SSIM-inspired)</label>
+                </div>
+            </div>
+
+            <div class="control-group" id="flexibleMatchingSensitivityControl" style="display: none;">
+                <label>Flexible Matching Sensitivity (higher = more forgiving)</label>
+                <div class="control-row">
+                    <input type="range" id="flexibleMatchingSensitivity" min="0.1" max="2.0" step="0.1" value="0.8">
+                    <span id="flexibleMatchingSensitivityValue">0.8</span>
                 </div>
             </div>
 
@@ -1007,6 +1023,14 @@
             document.getElementById('blockSizeControl').style.display = e.target.checked ? 'block' : 'none';
         });
 
+        document.getElementById('flexibleMatchingSensitivity').addEventListener('input', (e) => {
+            document.getElementById('flexibleMatchingSensitivityValue').textContent = e.target.value;
+        });
+
+        document.getElementById('useFlexibleMatching').addEventListener('change', (e) => {
+            document.getElementById('flexibleMatchingSensitivityControl').style.display = e.target.checked ? 'block' : 'none';
+        });
+
         // Mode toggle
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -1213,6 +1237,8 @@
             const useBlockComparison = document.getElementById('useBlockComparison').checked;
             const blockSize = parseInt(document.getElementById('blockSize').value);
             const minRegionSize = parseInt(document.getElementById('minRegionSize').value);
+            const useFlexibleMatching = document.getElementById('useFlexibleMatching').checked;
+            const flexibleSensitivity = parseFloat(document.getElementById('flexibleMatchingSensitivity').value);
 
             // Generate process ID
             currentProcessId = 'process-' + Date.now();
@@ -1230,7 +1256,9 @@
                     blurRadius: blurRadius,
                     useBlockComparison: useBlockComparison,
                     blockSize: blockSize,
-                    minRegionSize: minRegionSize
+                    minRegionSize: minRegionSize,
+                    useFlexibleMatching: useFlexibleMatching,
+                    flexibleSensitivity: flexibleSensitivity
                 }
             }, [beforeData.data.buffer, afterData.data.buffer]);
         }
@@ -1277,17 +1305,26 @@
                 if (showOutlines) {
                     drawOutlines(ctx, processed, canvas.width, canvas.height);
                 }
-            } else {
-                // Heatmap mode: show difference intensity
+            } else if (currentMode === 'heatmap') {
+                // Heatmap mode: show difference intensity with gradient
                 ctx.drawImage(afterImage, 0, 0);
                 
                 const heatmapData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 
+                // Find max intensity for normalization
+                let maxIntensity = 0;
+                for (let i = 0; i < originalDiff.length; i++) {
+                    if (originalDiff[i] > maxIntensity) {
+                        maxIntensity = originalDiff[i];
+                    }
+                }
+                
                 for (let i = 0; i < originalDiff.length; i++) {
                     if (originalDiff[i] > 0) {
                         const pixelIndex = i * 4;
-                        const intensity = Math.min(255, originalDiff[i] * 2);
-                        const heatColor = intensityToHeatColor(intensity);
+                        // Use actual magnitude from diff array (0-255)
+                        const normalizedIntensity = maxIntensity > 0 ? (originalDiff[i] / maxIntensity) * 255 : originalDiff[i];
+                        const heatColor = intensityToHeatColor(normalizedIntensity);
                         
                         // Blend with original
                         heatmapData.data[pixelIndex] = Math.floor(
@@ -1303,6 +1340,39 @@
                 }
                 
                 ctx.putImageData(heatmapData, 0, 0);
+            } else if (currentMode === 'intensity') {
+                // Intensity mode: show raw difference magnitude
+                ctx.drawImage(afterImage, 0, 0);
+                
+                const intensityData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                // Find max intensity for normalization
+                let maxIntensity = 0;
+                for (let i = 0; i < originalDiff.length; i++) {
+                    if (originalDiff[i] > maxIntensity) {
+                        maxIntensity = originalDiff[i];
+                    }
+                }
+                
+                for (let i = 0; i < originalDiff.length; i++) {
+                    const pixelIndex = i * 4;
+                    // Map magnitude directly to grayscale
+                    const intensity = maxIntensity > 0 ? (originalDiff[i] / maxIntensity) * 255 : 0;
+                    
+                    // Blend intensity with original (grayscale overlay)
+                    const gray = Math.floor(intensity);
+                    intensityData.data[pixelIndex] = Math.floor(
+                        intensityData.data[pixelIndex] * (1 - opacity) + gray * opacity
+                    );
+                    intensityData.data[pixelIndex + 1] = Math.floor(
+                        intensityData.data[pixelIndex + 1] * (1 - opacity) + gray * opacity
+                    );
+                    intensityData.data[pixelIndex + 2] = Math.floor(
+                        intensityData.data[pixelIndex + 2] * (1 - opacity) + gray * opacity
+                    );
+                }
+                
+                ctx.putImageData(intensityData, 0, 0);
             }
 
             // Update UI
@@ -1405,11 +1475,12 @@
                     
                     const isDifferent = delta > threshold;
                     
-                    // Mark all pixels in this block
+                    // Mark all pixels in this block with magnitude
+                    const magnitude = isDifferent ? Math.min(255, Math.floor((delta / threshold) * 255)) : 0;
                     for (let y = by; y < Math.min(by + blockSize, height); y++) {
                         for (let x = bx; x < Math.min(bx + blockSize, width); x++) {
                             const idx = y * width + x;
-                            output[idx] = isDifferent ? 255 : 0;
+                            output[idx] = magnitude;
                         }
                     }
                     

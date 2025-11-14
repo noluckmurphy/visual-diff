@@ -14,11 +14,13 @@ function rgbToQ(r, g, b) {
     return r * 0.21147017 - g * 0.52261711 + b * 0.31114694;
 }
 
-// Pixelmatch implementation
+// Pixelmatch implementation with flexible matching support
 function pixelmatch(img1, img2, output, width, height, options) {
     options = options || {};
     const threshold = options.threshold === undefined ? 0.1 : options.threshold;
     const includeAA = options.includeAA !== undefined ? options.includeAA : true;
+    const useFlexibleMatching = options.useFlexibleMatching || false;
+    const flexibleSensitivity = options.flexibleSensitivity || 0.8;
 
     let diff = 0;
     
@@ -46,20 +48,74 @@ function pixelmatch(img1, img2, output, width, height, options) {
                 continue;
             }
             
-            // Calculate color difference using YIQ color space
-            const yDiff = rgbToY(r1, g1, b1) - rgbToY(r2, g2, b2);
-            const iDiff = rgbToI(r1, g1, b1) - rgbToI(r2, g2, b2);
-            const qDiff = rgbToQ(r1, g1, b1) - rgbToQ(r2, g2, b2);
+            let delta;
             
-            const delta = Math.sqrt(yDiff * yDiff + iDiff * iDiff + qDiff * qDiff);
-            
-            if (delta > threshold) {
-                if (output) {
-                    output[y * width + x] = Math.min(255, Math.floor(delta * 255));
+            if (useFlexibleMatching) {
+                // SSIM-inspired perceptual matching
+                // Consider local neighborhood for structural similarity
+                let localSimilarity = 0;
+                let count = 0;
+                
+                for (let wy = -1; wy <= 1; wy++) {
+                    for (let wx = -1; wx <= 1; wx++) {
+                        const nx = x + wx;
+                        const ny = y + wy;
+                        
+                        if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                            const npos = (ny * width + nx) * 4;
+                            
+                            // Calculate local difference
+                            const nr1 = img1[npos];
+                            const ng1 = img1[npos + 1];
+                            const nb1 = img1[npos + 2];
+                            
+                            const nr2 = img2[npos];
+                            const ng2 = img2[npos + 1];
+                            const nb2 = img2[npos + 2];
+                            
+                            const nyDiff = rgbToY(nr1, ng1, nb1) - rgbToY(nr2, ng2, nb2);
+                            const niDiff = rgbToI(nr1, ng1, nb1) - rgbToI(nr2, ng2, nb2);
+                            const nqDiff = rgbToQ(nr1, ng1, nb1) - rgbToQ(nr2, ng2, nb2);
+                            
+                            const nDelta = Math.sqrt(nyDiff * nyDiff + niDiff * niDiff + nqDiff * nqDiff);
+                            localSimilarity += nDelta;
+                            count++;
+                        }
+                    }
                 }
+                
+                const avgLocalSimilarity = localSimilarity / count;
+                
+                // Calculate pixel difference
+                const yDiff = rgbToY(r1, g1, b1) - rgbToY(r2, g2, b2);
+                const iDiff = rgbToI(r1, g1, b1) - rgbToI(r2, g2, b2);
+                const qDiff = rgbToQ(r1, g1, b1) - rgbToQ(r2, g2, b2);
+                
+                const pixelDelta = Math.sqrt(yDiff * yDiff + iDiff * iDiff + qDiff * qDiff);
+                
+                // Combine pixel difference with local context
+                // If local area is similar, be more forgiving
+                const contextWeight = Math.max(0, 1 - (avgLocalSimilarity / (threshold * flexibleSensitivity)));
+                delta = pixelDelta * (1 - contextWeight * 0.5);
+            } else {
+                // Standard YIQ color space difference
+                const yDiff = rgbToY(r1, g1, b1) - rgbToY(r2, g2, b2);
+                const iDiff = rgbToI(r1, g1, b1) - rgbToI(r2, g2, b2);
+                const qDiff = rgbToQ(r1, g1, b1) - rgbToQ(r2, g2, b2);
+                
+                delta = Math.sqrt(yDiff * yDiff + iDiff * iDiff + qDiff * qDiff);
+            }
+            
+            // Store magnitude (0-255) instead of binary
+            if (output) {
+                // Normalize delta to 0-255 range, scaled by threshold
+                const normalizedDelta = Math.min(255, Math.floor((delta / threshold) * 255));
+                output[y * width + x] = normalizedDelta;
+            }
+            
+            // Count as different if above threshold
+            if (delta > threshold) {
                 diff++;
-            } else if (output) {
-                output[y * width + x] = 0;
             }
         }
         
@@ -123,11 +179,12 @@ function blockCompare(img1, img2, output, width, height, blockSize, threshold) {
             
             const isDifferent = delta > threshold;
             
-            // Mark all pixels in this block
+            // Mark all pixels in this block with magnitude
+            const magnitude = isDifferent ? Math.min(255, Math.floor((delta / threshold) * 255)) : 0;
             for (let y = by; y < Math.min(by + blockSize, height); y++) {
                 for (let x = bx; x < Math.min(bx + blockSize, width); x++) {
                     const idx = y * width + x;
-                    output[idx] = isDifferent ? 255 : 0;
+                    output[idx] = magnitude;
                 }
             }
             
@@ -297,7 +354,9 @@ self.addEventListener('message', function(e) {
             blurRadius,
             useBlockComparison,
             blockSize,
-            minRegionSize
+            minRegionSize,
+            useFlexibleMatching,
+            flexibleSensitivity
         } = data;
         
         try {
@@ -343,7 +402,12 @@ self.addEventListener('message', function(e) {
                     diff,
                     width,
                     height,
-                    { threshold: threshold, includeAA: true }
+                    { 
+                        threshold: threshold, 
+                        includeAA: true,
+                        useFlexibleMatching: useFlexibleMatching || false,
+                        flexibleSensitivity: flexibleSensitivity || 0.8
+                    }
                 );
             }
             
