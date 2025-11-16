@@ -2,13 +2,16 @@
 
 A powerful, standalone web-based application for comparing before and after images with intelligent difference highlighting. Perfect for interior design comparisons, UI/UX changes, photo editing verification, and AI-generated image analysis.
 
+**Now optimized for architects, interior designers, and selections coordinators** working on residential and luxury custom home projects with simplified workflows, project organization, and client presentation features.
+
 ## 🎯 Features
 
 ### Core Functionality
 - **Dual Image Comparison**: Upload and compare two images side-by-side
-- **Two Display Modes**:
+- **Three Display Modes**:
   - **Overlay Mode**: Highlights differences with a customizable color overlay
   - **Heatmap Mode**: Shows difference intensity using a color gradient (blue → cyan → green → yellow → red)
+  - **Intensity Mode**: Shows raw difference magnitude in grayscale
 
 ### Advanced Comparison Options
 - **Adjustable Sensitivity**: Control how sensitive the comparison is (0.05-2.0)
@@ -36,12 +39,65 @@ A powerful, standalone web-based application for comparing before and after imag
   - Automatic recommendations for settings adjustments
 
 ### User Experience
-- **Flexible Upload**: Upload images separately or both at once
+- **Flexible Upload**: Upload images separately, both at once, or drag and drop
 - **Real-time Preview**: See uploaded images before processing
 - **Customizable Highlight Color**: Choose any color for difference highlighting
 - **Adjustable Opacity**: Control overlay intensity (0.1-1.0)
 - **Responsive Design**: Modern, clean interface that works on various screen sizes
 - **No Dependencies**: Completely standalone - no external libraries required
+
+### New Features for Design Professionals
+
+#### Quick Start Presets
+- **Material Comparison**: Optimized for comparing finishes, tiles, and fabrics
+- **Room Redesign**: Settings for before/after room transformations
+- **Fixture Selection**: For comparing lighting, hardware, and fixtures
+- **Color Matching**: Strict comparison for paint and color samples
+- **Construction Progress**: For site photos with alignment focus
+- **Save Custom Presets**: Save your preferred settings as reusable presets
+
+#### Simplified Interface
+- **Simple Mode**: Hide technical settings, show only essential controls
+- **Advanced Mode**: Full access to all comparison settings
+- **One-Click Presets**: Start comparing immediately with optimized settings
+
+#### Project Organization
+- **Projects System**: Organize comparisons by project (e.g., "Smith Residence - Kitchen")
+- **Comparison History**: Automatically save all comparisons with thumbnails
+- **Quick Access**: Reopen previous comparisons with one click
+- **Project Filtering**: Filter history by project
+
+#### Export & Sharing
+- **Multiple Export Formats**: PNG, JPEG, PDF reports
+- **Side-by-Side Export**: Download before, after, and comparison in one image
+- **Copy to Clipboard**: Quick sharing of comparison results
+- **PDF Reports**: Professional reports with metadata and statistics
+
+#### Annotation Tools
+- **Draw on Comparisons**: Add freehand drawings
+- **Arrow Markers**: Point out specific areas
+- **Text Notes**: Add text annotations
+- **Highlight Regions**: Highlight important areas
+- **Export with Annotations**: Annotations included in exports
+
+#### Presentation Mode
+- **Full-Screen View**: Present comparisons in full-screen mode
+- **Navigation**: Browse through comparison history
+- **Keyboard Controls**: Arrow keys and spacebar for navigation
+- **Minimal UI**: Clean presentation interface
+
+#### Mobile Optimization
+- **Touch-Friendly**: Optimized for tablets and phones
+- **Camera Integration**: Direct photo capture from mobile devices
+- **Responsive Layout**: Adapts to all screen sizes
+- **Touch Gestures**: Swipe and touch support for annotations
+
+#### Keyboard Shortcuts
+- **Space**: Generate comparison
+- **E**: Export comparison
+- **M**: Toggle magnifier
+- **Arrow Keys**: Navigate in presentation mode
+- **Escape**: Exit presentation mode
 
 ## 🚀 Getting Started
 

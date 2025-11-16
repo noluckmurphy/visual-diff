@@ -571,12 +571,539 @@
             transition: width 0.3s ease;
             border-radius: 3px;
         }
+
+        /* Presets and Simplified Mode Styles */
+        .presets-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .presets-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .presets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .preset-btn {
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .preset-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .preset-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .preset-icon {
+            font-size: 24px;
+        }
+
+        .preset-name {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .preset-desc {
+            font-size: 11px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .preset-btn.active .preset-desc {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .mode-switcher {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .simple-mode-toggle {
+            padding: 6px 12px;
+            border: 2px solid #667eea;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: #667eea;
+        }
+
+        .simple-mode-toggle.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .advanced-controls {
+            display: block;
+        }
+
+        .advanced-controls.hidden {
+            display: none;
+        }
+
+        .simple-controls {
+            display: none;
+        }
+
+        .simple-controls.visible {
+            display: block;
+        }
+
+        .simple-sensitivity-label {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        /* Export Styles */
+        .export-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .export-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .export-btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .export-btn.secondary {
+            background: #6c757d;
+        }
+
+        .export-btn.secondary:hover {
+            background: #5a6268;
+        }
+
+        /* Drag and Drop Styles */
+        .upload-box.drag-over {
+            border-color: #667eea;
+            background: #e3f2fd;
+            border-style: solid;
+        }
+
+        /* History Styles */
+        .history-section {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 15px;
+            min-width: 250px;
+            max-width: 350px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 10000;
+            display: none;
+        }
+
+        .history-section.active {
+            display: block;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .history-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: #e9ecef;
+        }
+
+        .history-thumbnail {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+
+        .history-info {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .history-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #667eea;
+            z-index: 10001;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .history-toggle:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Projects Styles */
+        .projects-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .project-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .project-select {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .new-project-btn {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Annotation Styles */
+        .annotation-tools {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .annotation-tools.active {
+            display: block;
+        }
+
+        .annotation-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .annotation-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .annotation-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .annotation-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .annotation-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .annotation-canvas.drawing {
+            pointer-events: all;
+        }
+
+        .output-container {
+            position: relative;
+        }
+
+        /* Presentation Mode */
+        .presentation-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 20000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .presentation-mode.active {
+            display: flex;
+        }
+
+        .presentation-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .presentation-image {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+        }
+
+        .presentation-stats {
+            color: white;
+            font-size: 24px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .presentation-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 20001;
+        }
+
+        .presentation-btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .presentation-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .presentation-close {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20001;
+            backdrop-filter: blur(10px);
+        }
+
+        .presentation-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .presets-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .export-buttons {
+                flex-direction: column;
+            }
+
+            .export-btn {
+                width: 100%;
+            }
+
+            .history-section {
+                left: 10px;
+                right: 10px;
+                max-width: none;
+            }
+
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+
+            .controls-section {
+                padding: 15px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .presets-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .preset-btn {
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+
+            .preset-icon {
+                font-size: 20px;
+            }
+
+            .history-toggle {
+                top: 10px;
+                left: 10px;
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .background-processes {
+                top: 10px;
+                right: 10px;
+                max-width: calc(100vw - 20px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 22px;
+            }
+
+            .presets-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mode-toggle {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .mode-btn {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
+    <button class="history-toggle" id="historyToggle">📚 History</button>
+    
+    <div class="history-section" id="historySection">
+        <div class="history-header">
+            <h3>Comparison History</h3>
+            <button class="background-processes-close" id="historyClose">×</button>
+        </div>
+        <div id="historyList"></div>
+    </div>
+
     <div class="container">
         <h1>🎨 Visual Diff Tool</h1>
         <p class="subtitle">Compare before and after images with intelligent difference highlighting</p>
+
+        <div class="projects-section" id="projectsSection">
+            <div class="project-selector">
+                <select id="projectSelect" class="project-select">
+                    <option value="">No Project</option>
+                </select>
+                <button class="new-project-btn" id="newProjectBtn">+ New Project</button>
+            </div>
+        </div>
+
+        <div class="presets-section">
+            <div class="presets-header">
+                <h3>Quick Start Presets</h3>
+                <div class="mode-switcher">
+                    <button class="simple-mode-toggle" id="simpleModeToggle">Simple Mode</button>
+                </div>
+            </div>
+            <div class="presets-grid" id="presetsGrid"></div>
+            <div style="text-align: center;">
+                <button class="export-btn secondary" id="savePresetBtn" style="display: none;">Save Current Settings as Preset</button>
+            </div>
+        </div>
 
         <div class="info-box">
             <strong>🎯 Tips for AI-generated image comparisons:</strong><br>
@@ -630,6 +1157,21 @@
                 </div>
             </div>
 
+            <div class="simple-controls" id="simpleControls">
+                <div class="control-group">
+                    <label class="simple-sensitivity-label">How strict should the comparison be?</label>
+                    <div class="control-row">
+                        <span style="font-size: 12px; color: #666;">More Forgiving</span>
+                        <input type="range" id="simpleThreshold" min="0.05" max="2.0" step="0.05" value="0.5" style="flex: 1;">
+                        <span style="font-size: 12px; color: #666;">More Strict</span>
+                    </div>
+                    <div style="text-align: center; margin-top: 5px;">
+                        <span id="simpleThresholdValue" style="color: #667eea; font-weight: 600;">0.5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="advanced-controls" id="advancedControls">
             <div class="control-group">
                 <label>Sensitivity (higher = more forgiving, ignore subtle AI variations)</label>
                 <div class="control-row">
@@ -728,6 +1270,8 @@
                 </div>
             </div>
 
+            </div>
+
             <button class="process-btn" id="processBtn" disabled>
                 Generate Comparison
             </button>
@@ -745,6 +1289,7 @@
             <h2>📊 Comparison Result</h2>
             <div class="output-container" id="outputContainer">
                 <canvas id="outputCanvas" class="output-canvas"></canvas>
+                <canvas id="annotationCanvas" class="annotation-canvas"></canvas>
                 <div id="statusMessage" class="status-message">
                     Upload both images to begin
                 </div>
@@ -814,8 +1359,49 @@
                     <span id="statsText"></span>
                 </div>
             </div>
+
+            <div class="annotation-tools" id="annotationTools">
+                <h3>Annotation Tools</h3>
+                <div class="annotation-buttons">
+                    <button class="annotation-btn" id="drawBtn" data-tool="draw">✏️ Draw</button>
+                    <button class="annotation-btn" id="arrowBtn" data-tool="arrow">➡️ Arrow</button>
+                    <button class="annotation-btn" id="textBtn" data-tool="text">📝 Text</button>
+                    <button class="annotation-btn" id="highlightBtn" data-tool="highlight">🖍️ Highlight</button>
+                    <button class="annotation-btn" id="clearAnnotationsBtn">🗑️ Clear</button>
+                </div>
+                <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                    Click and drag on the comparison to annotate. Use Clear to remove all annotations.
+                </p>
+            </div>
+
+            <div class="export-section" id="exportSection" style="display: none;">
+                <h3>Export Comparison</h3>
+                <div class="export-buttons">
+                    <button class="export-btn" id="exportPNG">Download PNG</button>
+                    <button class="export-btn" id="exportJPEG">Download JPEG</button>
+                    <button class="export-btn" id="exportSideBySide">Side-by-Side</button>
+                    <button class="export-btn" id="exportPDF">PDF Report</button>
+                    <button class="export-btn secondary" id="copyToClipboard">Copy to Clipboard</button>
+                    <button class="export-btn secondary" id="toggleAnnotationsBtn">Toggle Annotations</button>
+                    <button class="export-btn" id="presentationModeBtn">📺 Presentation Mode</button>
+                </div>
+            </div>
         </div>
     </div>
+
+    <div class="presentation-mode" id="presentationMode">
+        <div class="presentation-content" id="presentationContent">
+            <img id="presentationImage" class="presentation-image" alt="Comparison">
+            <div class="presentation-stats" id="presentationStats"></div>
+        </div>
+        <div class="presentation-controls">
+            <button class="presentation-btn" id="presentationPrev">◀ Previous</button>
+            <button class="presentation-btn" id="presentationNext">Next ▶</button>
+        </div>
+        <button class="presentation-close" id="presentationClose">×</button>
+    </div>
+
+    <script src="presets.js"></script>
 
     <script>
         // Web Worker for image processing
@@ -1881,6 +2467,854 @@
                 return { r: 255, g: Math.floor(255 * (1 - t)), b: 0 };
             }
         }
+
+        // ========== NEW FEATURES: Presets, Export, History, Projects, Drag & Drop ==========
+
+        let currentPreset = null;
+        let isSimpleMode = false;
+        let currentComparisonData = null;
+
+        // Initialize Presets
+        function initializePresets() {
+            const presetsGrid = document.getElementById('presetsGrid');
+            const allPresets = getAllPresets();
+            
+            presetsGrid.innerHTML = '';
+            
+            Object.keys(allPresets).forEach(presetId => {
+                const preset = allPresets[presetId];
+                const btn = document.createElement('button');
+                btn.className = 'preset-btn';
+                btn.dataset.presetId = presetId;
+                btn.innerHTML = `
+                    <span class="preset-icon">${preset.icon || '⭐'}</span>
+                    <span class="preset-name">${preset.name}</span>
+                    <span class="preset-desc">${preset.description}</span>
+                `;
+                btn.addEventListener('click', () => selectPreset(presetId));
+                presetsGrid.appendChild(btn);
+            });
+        }
+
+        function selectPreset(presetId) {
+            currentPreset = presetId;
+            applyPreset(presetId);
+            
+            // Update UI
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-preset-id="${presetId}"]`)?.classList.add('active');
+        }
+
+        // Simple/Advanced Mode Toggle
+        document.getElementById('simpleModeToggle').addEventListener('click', () => {
+            isSimpleMode = !isSimpleMode;
+            const toggle = document.getElementById('simpleModeToggle');
+            const simpleControls = document.getElementById('simpleControls');
+            const advancedControls = document.getElementById('advancedControls');
+            
+            if (isSimpleMode) {
+                toggle.textContent = 'Advanced Mode';
+                toggle.classList.add('active');
+                simpleControls.classList.add('visible');
+                advancedControls.classList.add('hidden');
+                
+                // Sync simple threshold with main threshold
+                const threshold = parseFloat(document.getElementById('threshold').value);
+                document.getElementById('simpleThreshold').value = threshold;
+                document.getElementById('simpleThresholdValue').textContent = threshold;
+            } else {
+                toggle.textContent = 'Simple Mode';
+                toggle.classList.remove('active');
+                simpleControls.classList.remove('visible');
+                advancedControls.classList.remove('hidden');
+            }
+        });
+
+        // Sync simple threshold with main threshold
+        document.getElementById('simpleThreshold').addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            document.getElementById('simpleThresholdValue').textContent = value;
+            document.getElementById('threshold').value = value;
+            document.getElementById('thresholdValue').textContent = value;
+        });
+
+        // Export Functions
+        function exportCanvas(format = 'png', quality = 0.9) {
+            const canvas = document.getElementById('outputCanvas');
+            if (!canvas || !beforeImage || !afterImage) {
+                alert('No comparison to export. Please generate a comparison first.');
+                return;
+            }
+            
+            const filename = `comparison-${Date.now()}.${format}`;
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+            }, `image/${format}`, quality);
+        }
+
+        function exportSideBySide() {
+            if (!beforeImage || !afterImage) {
+                alert('No images to export. Please upload images first.');
+                return;
+            }
+            
+            const canvas = document.getElementById('outputCanvas');
+            const comparisonCanvas = document.createElement('canvas');
+            const width = Math.max(beforeImage.width, afterImage.width, canvas.width);
+            const height = beforeImage.height + afterImage.height + canvas.height + 60; // Add spacing
+            
+            comparisonCanvas.width = width * 3; // Before | After | Comparison
+            comparisonCanvas.height = Math.max(beforeImage.height, afterImage.height, canvas.height) + 40;
+            
+            const ctx = comparisonCanvas.getContext('2d');
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fillRect(0, 0, comparisonCanvas.width, comparisonCanvas.height);
+            
+            // Draw Before
+            ctx.drawImage(beforeImage, 10, 30, beforeImage.width, beforeImage.height);
+            ctx.fillStyle = '#333';
+            ctx.font = '16px sans-serif';
+            ctx.fillText('Before', 10, 20);
+            
+            // Draw After
+            ctx.drawImage(afterImage, width + 20, 30, afterImage.width, afterImage.height);
+            ctx.fillText('After', width + 20, 20);
+            
+            // Draw Comparison
+            ctx.drawImage(canvas, width * 2 + 30, 30, canvas.width, canvas.height);
+            ctx.fillText('Comparison', width * 2 + 30, 20);
+            
+            comparisonCanvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `side-by-side-${Date.now()}.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        function exportPDF() {
+            // Simple PDF export using canvas
+            if (!beforeImage || !afterImage) {
+                alert('No images to export. Please upload images first.');
+                return;
+            }
+            
+            const canvas = document.getElementById('outputCanvas');
+            const pdfCanvas = document.createElement('canvas');
+            pdfCanvas.width = 1200;
+            pdfCanvas.height = 1600;
+            
+            const ctx = pdfCanvas.getContext('2d');
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, pdfCanvas.width, pdfCanvas.height);
+            
+            // Title
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 24px sans-serif';
+            ctx.fillText('Visual Comparison Report', 50, 50);
+            
+            // Date
+            ctx.font = '14px sans-serif';
+            ctx.fillText(`Generated: ${new Date().toLocaleString()}`, 50, 80);
+            
+            // Stats
+            if (currentComparisonData) {
+                ctx.fillText(`Change: ${currentComparisonData.changePercent}%`, 50, 110);
+                ctx.fillText(`Pixels Changed: ${currentComparisonData.numDiffPixels.toLocaleString()}`, 50, 135);
+            }
+            
+            // Images
+            const imgWidth = 350;
+            const imgHeight = (canvas.height / canvas.width) * imgWidth;
+            let yPos = 180;
+            
+            ctx.fillText('Before', 50, yPos);
+            ctx.drawImage(beforeImage, 50, yPos + 10, imgWidth, imgHeight);
+            yPos += imgHeight + 50;
+            
+            ctx.fillText('After', 50, yPos);
+            ctx.drawImage(afterImage, 50, yPos + 10, imgWidth, imgHeight);
+            yPos += imgHeight + 50;
+            
+            ctx.fillText('Comparison', 50, yPos);
+            ctx.drawImage(canvas, 50, yPos + 10, imgWidth, imgHeight);
+            
+            // Export as image (browser can't generate PDF directly, so we export as PNG)
+            pdfCanvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `comparison-report-${Date.now()}.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+                alert('PDF export saved as PNG. You can print this as PDF from your browser.');
+            });
+        }
+
+        function copyToClipboard() {
+            const canvas = document.getElementById('outputCanvas');
+            canvas.toBlob((blob) => {
+                navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]).then(() => {
+                    alert('Image copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                    alert('Failed to copy to clipboard. Please try downloading instead.');
+                });
+            });
+        }
+
+        // Export button handlers
+        document.getElementById('exportPNG').addEventListener('click', () => exportCanvas('png'));
+        document.getElementById('exportJPEG').addEventListener('click', () => exportCanvas('jpeg', 0.9));
+        document.getElementById('exportSideBySide').addEventListener('click', exportSideBySide);
+        document.getElementById('exportPDF').addEventListener('click', exportPDF);
+        document.getElementById('copyToClipboard').addEventListener('click', copyToClipboard);
+
+        // History Management
+        function saveToHistory() {
+            if (!beforeImage || !afterImage || !currentComparisonData) return;
+            
+            try {
+                const history = JSON.parse(localStorage.getItem('comparisonHistory') || '[]');
+                const entry = {
+                    id: Date.now(),
+                    timestamp: new Date().toISOString(),
+                    beforeImage: beforeImage.src,
+                    afterImage: afterImage.src,
+                    beforeFileName: beforeImage.fileName || 'before.jpg',
+                    afterFileName: afterImage.fileName || 'after.jpg',
+                    settings: getCurrentSettings(),
+                    changePercent: currentComparisonData.changePercent,
+                    numDiffPixels: currentComparisonData.numDiffPixels,
+                    projectId: document.getElementById('projectSelect').value || null,
+                    thumbnail: document.getElementById('outputCanvas').toDataURL('image/jpeg', 0.5)
+                };
+                
+                history.unshift(entry);
+                // Keep only last 50 entries
+                if (history.length > 50) {
+                    history = history.slice(0, 50);
+                }
+                
+                localStorage.setItem('comparisonHistory', JSON.stringify(history));
+                updateHistoryDisplay();
+            } catch (e) {
+                console.error('Error saving to history:', e);
+            }
+        }
+
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            try {
+                const history = JSON.parse(localStorage.getItem('comparisonHistory') || '[]');
+                
+                if (history.length === 0) {
+                    historyList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No comparison history yet.</p>';
+                    return;
+                }
+                
+                historyList.innerHTML = history.map(entry => {
+                    const date = new Date(entry.timestamp);
+                    return `
+                        <div class="history-item" data-id="${entry.id}">
+                            <img src="${entry.thumbnail}" class="history-thumbnail" alt="Comparison">
+                            <div class="history-info">
+                                <strong>${entry.beforeFileName} vs ${entry.afterFileName}</strong><br>
+                                ${date.toLocaleString()}<br>
+                                Change: ${entry.changePercent}%
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Add click handlers
+                historyList.querySelectorAll('.history-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const id = parseInt(item.dataset.id);
+                        loadFromHistory(id);
+                    });
+                });
+            } catch (e) {
+                console.error('Error loading history:', e);
+                historyList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Error loading history.</p>';
+            }
+        }
+
+        function loadFromHistory(id) {
+            try {
+                const history = JSON.parse(localStorage.getItem('comparisonHistory') || '[]');
+                const entry = history.find(e => e.id === id);
+                if (!entry) return;
+                
+                // Load images
+                const beforeImg = new Image();
+                const afterImg = new Image();
+                
+                beforeImg.onload = () => {
+                    afterImg.onload = () => {
+                        beforeImage = beforeImg;
+                        afterImage = afterImg;
+                        beforeImage.fileName = entry.beforeFileName;
+                        afterImage.fileName = entry.afterFileName;
+                        
+                        document.getElementById('beforePreview').src = entry.beforeImage;
+                        document.getElementById('beforePreview').style.display = 'block';
+                        document.getElementById('beforeBox').classList.add('has-image');
+                        
+                        document.getElementById('afterPreview').src = entry.afterImage;
+                        document.getElementById('afterPreview').style.display = 'block';
+                        document.getElementById('afterBox').classList.add('has-image');
+                        
+                        // Apply settings
+                        if (entry.settings) {
+                            Object.keys(entry.settings).forEach(key => {
+                                const el = document.getElementById(key);
+                                if (el) {
+                                    if (el.type === 'checkbox') {
+                                        el.checked = entry.settings[key];
+                                    } else if (el.type === 'range') {
+                                        el.value = entry.settings[key];
+                                        const valueEl = document.getElementById(key + 'Value');
+                                        if (valueEl) {
+                                            valueEl.textContent = entry.settings[key];
+                                        }
+                                    } else {
+                                        el.value = entry.settings[key];
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // Set project
+                        if (entry.projectId) {
+                            document.getElementById('projectSelect').value = entry.projectId;
+                        }
+                        
+                        checkIfReadyToProcess();
+                        document.getElementById('historySection').classList.remove('active');
+                    };
+                    afterImg.src = entry.afterImage;
+                };
+                beforeImg.src = entry.beforeImage;
+            } catch (e) {
+                console.error('Error loading from history:', e);
+                alert('Error loading comparison from history.');
+            }
+        }
+
+        // History UI
+        document.getElementById('historyToggle').addEventListener('click', () => {
+            document.getElementById('historySection').classList.toggle('active');
+            updateHistoryDisplay();
+        });
+
+        document.getElementById('historyClose').addEventListener('click', () => {
+            document.getElementById('historySection').classList.remove('active');
+        });
+
+        // Projects Management
+        function loadProjects() {
+            try {
+                const projects = JSON.parse(localStorage.getItem('projects') || '[]');
+                const select = document.getElementById('projectSelect');
+                select.innerHTML = '<option value="">No Project</option>';
+                
+                projects.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.id;
+                    option.textContent = project.name;
+                    select.appendChild(option);
+                });
+            } catch (e) {
+                console.error('Error loading projects:', e);
+            }
+        }
+
+        function createProject() {
+            const name = prompt('Enter project name:');
+            if (!name) return;
+            
+            try {
+                const projects = JSON.parse(localStorage.getItem('projects') || '[]');
+                const project = {
+                    id: Date.now(),
+                    name: name,
+                    created: new Date().toISOString()
+                };
+                projects.push(project);
+                localStorage.setItem('projects', JSON.stringify(projects));
+                loadProjects();
+                document.getElementById('projectSelect').value = project.id;
+            } catch (e) {
+                console.error('Error creating project:', e);
+                alert('Error creating project.');
+            }
+        }
+
+        document.getElementById('newProjectBtn').addEventListener('click', createProject);
+        loadProjects();
+
+        // Drag and Drop
+        function setupDragAndDrop() {
+            const beforeBox = document.getElementById('beforeBox');
+            const afterBox = document.getElementById('afterBox');
+            
+            [beforeBox, afterBox].forEach((box, index) => {
+                const type = index === 0 ? 'before' : 'after';
+                
+                box.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    box.classList.add('drag-over');
+                });
+                
+                box.addEventListener('dragleave', () => {
+                    box.classList.remove('drag-over');
+                });
+                
+                box.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    box.classList.remove('drag-over');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        loadFileAsImage(files[0], type);
+                    }
+                });
+            });
+            
+            // Also allow dropping on the container for both files
+            const container = document.querySelector('.container');
+            container.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+            
+            container.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+                if (files.length >= 2) {
+                    loadFileAsImage(files[0], 'before');
+                    loadFileAsImage(files[1], 'after');
+                } else if (files.length === 1) {
+                    // If only one file, ask which side
+                    if (!beforeImage) {
+                        loadFileAsImage(files[0], 'before');
+                    } else if (!afterImage) {
+                        loadFileAsImage(files[0], 'after');
+                    }
+                }
+            });
+        }
+
+        // Update renderComparisonResult to save data and show export
+        const originalRenderComparisonResult = renderComparisonResult;
+        renderComparisonResult = function(processed, originalDiff, numDiffPixels) {
+            originalRenderComparisonResult(processed, originalDiff, numDiffPixels);
+            
+            // Store comparison data
+            const canvas = document.getElementById('outputCanvas');
+            const totalPixels = canvas.width * canvas.height;
+            const changePercent = ((numDiffPixels / totalPixels) * 100).toFixed(2);
+            
+            currentComparisonData = {
+                changePercent: changePercent,
+                numDiffPixels: numDiffPixels,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Show export section
+            document.getElementById('exportSection').style.display = 'block';
+            
+            // Save to history
+            saveToHistory();
+        };
+
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    if (beforeImage && afterImage && !document.getElementById('processBtn').disabled) {
+                        document.getElementById('processBtn').click();
+                    }
+                    break;
+                case 'e':
+                case 'E':
+                    if (currentComparisonData) {
+                        exportCanvas('png');
+                    }
+                    break;
+                case 'm':
+                case 'M':
+                    if (document.getElementById('magnifierToggle').style.display !== 'none') {
+                        document.getElementById('magnifierToggle').click();
+                    }
+                    break;
+            }
+        });
+
+        // Annotation System
+        let currentTool = null;
+        let isDrawing = false;
+        let annotationCanvas = null;
+        let annotationCtx = null;
+        let startX = 0;
+        let startY = 0;
+
+        function initializeAnnotations() {
+            annotationCanvas = document.getElementById('annotationCanvas');
+            annotationCtx = annotationCanvas.getContext('2d');
+            
+            // Sync canvas size with output canvas
+            const outputCanvas = document.getElementById('outputCanvas');
+            const updateAnnotationCanvas = () => {
+                if (outputCanvas.width > 0 && outputCanvas.height > 0) {
+                    const rect = outputCanvas.getBoundingClientRect();
+                    annotationCanvas.width = outputCanvas.width;
+                    annotationCanvas.height = outputCanvas.height;
+                    annotationCanvas.style.width = rect.width + 'px';
+                    annotationCanvas.style.height = rect.height + 'px';
+                }
+            };
+            
+            // Update on window resize
+            window.addEventListener('resize', updateAnnotationCanvas);
+            
+            // Update when comparison is rendered
+            const originalRender = renderComparisonResult;
+            renderComparisonResult = function(...args) {
+                originalRender(...args);
+                setTimeout(updateAnnotationCanvas, 100);
+            };
+        }
+
+        function setAnnotationTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.annotation-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const btn = document.querySelector(`[data-tool="${tool}"]`);
+            if (btn) btn.classList.add('active');
+            
+            if (tool) {
+                annotationCanvas.classList.add('drawing');
+            } else {
+                annotationCanvas.classList.remove('drawing');
+            }
+        }
+
+        function getCanvasCoordinates(e) {
+            const canvas = document.getElementById('outputCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        }
+
+        function setupAnnotationHandlers() {
+            const container = document.getElementById('outputContainer');
+            
+            container.addEventListener('mousedown', (e) => {
+                if (!currentTool) return;
+                
+                const coords = getCanvasCoordinates(e);
+                startX = coords.x;
+                startY = coords.y;
+                isDrawing = true;
+                
+                if (currentTool === 'text') {
+                    const text = prompt('Enter text:');
+                    if (text) {
+                        annotationCtx.fillStyle = '#ff0000';
+                        annotationCtx.font = '20px Arial';
+                        annotationCtx.fillText(text, startX, startY);
+                    }
+                    isDrawing = false;
+                }
+            });
+            
+            container.addEventListener('mousemove', (e) => {
+                if (!isDrawing || !currentTool) return;
+                
+                const coords = getCanvasCoordinates(e);
+                
+                if (currentTool === 'draw') {
+                    annotationCtx.strokeStyle = '#ff0000';
+                    annotationCtx.lineWidth = 3;
+                    annotationCtx.lineCap = 'round';
+                    annotationCtx.beginPath();
+                    annotationCtx.moveTo(startX, startY);
+                    annotationCtx.lineTo(coords.x, coords.y);
+                    annotationCtx.stroke();
+                    startX = coords.x;
+                    startY = coords.y;
+                } else if (currentTool === 'highlight') {
+                    annotationCtx.fillStyle = 'rgba(255, 255, 0, 0.3)';
+                    annotationCtx.fillRect(
+                        Math.min(startX, coords.x),
+                        Math.min(startY, coords.y),
+                        Math.abs(coords.x - startX),
+                        Math.abs(coords.y - startY)
+                    );
+                }
+            });
+            
+            container.addEventListener('mouseup', (e) => {
+                if (!isDrawing || !currentTool) return;
+                
+                const coords = getCanvasCoordinates(e);
+                
+                if (currentTool === 'arrow') {
+                    drawArrow(startX, startY, coords.x, coords.y);
+                } else if (currentTool === 'highlight') {
+                    // Already drawn in mousemove
+                }
+                
+                isDrawing = false;
+            });
+            
+            // Touch support for mobile
+            container.addEventListener('touchstart', (e) => {
+                if (!currentTool) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                container.dispatchEvent(mouseEvent);
+            });
+            
+            container.addEventListener('touchmove', (e) => {
+                if (!currentTool || !isDrawing) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                container.dispatchEvent(mouseEvent);
+            });
+            
+            container.addEventListener('touchend', (e) => {
+                if (!currentTool || !isDrawing) return;
+                e.preventDefault();
+                const mouseEvent = new MouseEvent('mouseup', {});
+                container.dispatchEvent(mouseEvent);
+            });
+        }
+
+        function drawArrow(x1, y1, x2, y2) {
+            annotationCtx.strokeStyle = '#ff0000';
+            annotationCtx.lineWidth = 3;
+            annotationCtx.beginPath();
+            annotationCtx.moveTo(x1, y1);
+            annotationCtx.lineTo(x2, y2);
+            annotationCtx.stroke();
+            
+            // Draw arrowhead
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            const arrowLength = 15;
+            const arrowAngle = Math.PI / 6;
+            
+            annotationCtx.beginPath();
+            annotationCtx.moveTo(x2, y2);
+            annotationCtx.lineTo(
+                x2 - arrowLength * Math.cos(angle - arrowAngle),
+                y2 - arrowLength * Math.sin(angle - arrowAngle)
+            );
+            annotationCtx.moveTo(x2, y2);
+            annotationCtx.lineTo(
+                x2 - arrowLength * Math.cos(angle + arrowAngle),
+                y2 - arrowLength * Math.sin(angle + arrowAngle)
+            );
+            annotationCtx.stroke();
+        }
+
+        // Annotation button handlers
+        document.getElementById('drawBtn').addEventListener('click', () => setAnnotationTool('draw'));
+        document.getElementById('arrowBtn').addEventListener('click', () => setAnnotationTool('arrow'));
+        document.getElementById('textBtn').addEventListener('click', () => setAnnotationTool('text'));
+        document.getElementById('highlightBtn').addEventListener('click', () => setAnnotationTool('highlight'));
+        document.getElementById('clearAnnotationsBtn').addEventListener('click', () => {
+            annotationCtx.clearRect(0, 0, annotationCanvas.width, annotationCanvas.height);
+        });
+        document.getElementById('toggleAnnotationsBtn').addEventListener('click', () => {
+            const tools = document.getElementById('annotationTools');
+            tools.classList.toggle('active');
+        });
+
+        // Update export functions to include annotations
+        const originalExportCanvas = exportCanvas;
+        exportCanvas = function(format = 'png', quality = 0.9) {
+            const outputCanvas = document.getElementById('outputCanvas');
+            if (!outputCanvas || !beforeImage || !afterImage) {
+                alert('No comparison to export. Please generate a comparison first.');
+                return;
+            }
+            
+            // Create combined canvas with annotations
+            const combinedCanvas = document.createElement('canvas');
+            combinedCanvas.width = outputCanvas.width;
+            combinedCanvas.height = outputCanvas.height;
+            const combinedCtx = combinedCanvas.getContext('2d');
+            
+            // Draw comparison
+            combinedCtx.drawImage(outputCanvas, 0, 0);
+            
+            // Draw annotations
+            combinedCtx.drawImage(annotationCanvas, 0, 0);
+            
+            const filename = `comparison-${Date.now()}.${format}`;
+            combinedCanvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+            }, `image/${format}`, quality);
+        };
+
+        // Camera integration for mobile
+        function setupCameraIntegration() {
+            const beforeInput = document.getElementById('beforeInput');
+            const afterInput = document.getElementById('afterInput');
+            
+            // Add capture attribute for mobile cameras
+            if (beforeInput) {
+                beforeInput.setAttribute('capture', 'environment');
+            }
+            if (afterInput) {
+                afterInput.setAttribute('capture', 'environment');
+            }
+        }
+
+        // Presentation Mode
+        let presentationHistory = [];
+        let currentPresentationIndex = -1;
+
+        function enterPresentationMode() {
+            if (!currentComparisonData) {
+                alert('No comparison to present. Please generate a comparison first.');
+                return;
+            }
+            
+            const canvas = document.getElementById('outputCanvas');
+            const presentationMode = document.getElementById('presentationMode');
+            const presentationImage = document.getElementById('presentationImage');
+            const presentationStats = document.getElementById('presentationStats');
+            
+            // Load history for navigation
+            try {
+                const history = JSON.parse(localStorage.getItem('comparisonHistory') || '[]');
+                presentationHistory = history.filter(h => h.thumbnail);
+                currentPresentationIndex = presentationHistory.length - 1;
+            } catch (e) {
+                console.error('Error loading presentation history:', e);
+                presentationHistory = [];
+            }
+            
+            // Show current comparison
+            presentationImage.src = canvas.toDataURL('image/png');
+            presentationStats.textContent = `Change: ${currentComparisonData.changePercent}% | ${currentComparisonData.numDiffPixels.toLocaleString()} pixels changed`;
+            
+            presentationMode.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            updatePresentationControls();
+        }
+
+        function exitPresentationMode() {
+            const presentationMode = document.getElementById('presentationMode');
+            presentationMode.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function showPresentationItem(index) {
+            if (index < 0 || index >= presentationHistory.length) return;
+            
+            currentPresentationIndex = index;
+            const item = presentationHistory[index];
+            const presentationImage = document.getElementById('presentationImage');
+            const presentationStats = document.getElementById('presentationStats');
+            
+            presentationImage.src = item.thumbnail;
+            presentationStats.textContent = `${item.beforeFileName} vs ${item.afterFileName} | Change: ${item.changePercent}%`;
+            
+            updatePresentationControls();
+        }
+
+        function updatePresentationControls() {
+            const prevBtn = document.getElementById('presentationPrev');
+            const nextBtn = document.getElementById('presentationNext');
+            
+            prevBtn.disabled = currentPresentationIndex <= 0;
+            nextBtn.disabled = currentPresentationIndex >= presentationHistory.length - 1;
+        }
+
+        function presentationNext() {
+            if (currentPresentationIndex < presentationHistory.length - 1) {
+                showPresentationItem(currentPresentationIndex + 1);
+            }
+        }
+
+        function presentationPrev() {
+            if (currentPresentationIndex > 0) {
+                showPresentationItem(currentPresentationIndex - 1);
+            }
+        }
+
+        // Presentation mode handlers
+        document.getElementById('presentationModeBtn').addEventListener('click', enterPresentationMode);
+        document.getElementById('presentationClose').addEventListener('click', exitPresentationMode);
+        document.getElementById('presentationNext').addEventListener('click', presentationNext);
+        document.getElementById('presentationPrev').addEventListener('click', presentationPrev);
+
+        // Keyboard navigation in presentation mode
+        document.addEventListener('keydown', (e) => {
+            const presentationMode = document.getElementById('presentationMode');
+            if (!presentationMode.classList.contains('active')) return;
+            
+            switch(e.key) {
+                case 'Escape':
+                    exitPresentationMode();
+                    break;
+                case 'ArrowRight':
+                case ' ':
+                    e.preventDefault();
+                    presentationNext();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    presentationPrev();
+                    break;
+            }
+        });
+
+        // Initialize all new features
+        initializePresets();
+        setupDragAndDrop();
+        updateHistoryDisplay();
+        initializeAnnotations();
+        setupAnnotationHandlers();
+        setupCameraIntegration();
 
         // Initialize magnifier
         setupMagnifier();
